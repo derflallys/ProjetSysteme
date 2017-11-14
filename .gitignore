@@ -68,3 +68,6 @@ Supprimerait .gitignore
 Supprimerait .idea/
 Supprimerait cmake-build-debug/
 
+
+/cmake-build-debug/
+/CMakeLists.txt

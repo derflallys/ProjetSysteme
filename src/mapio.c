@@ -46,21 +46,79 @@ void map_new (unsigned width, unsigned height)
 
 void map_save (char *filename)
 {
-   for (int x = 0; x < map_width(); x++)
+    unsigned int buffInt;
+    char buff;
+
+   int fd = open(filename,O_CREAT|O_WRONLY|O_TRUNC,0666);
+    if(fd !=-1)
+    {
+        //save width char: w
+        write (fd,"w",1);
+        sprintf(&buff,"%d",map_width());
+        //save width unsignedint val
+        write (fd,&buff,sizeof(unsigned));
+
+         //save height char: h
+            write (fd,"h",1);
+            sprintf(&buff,"%d",map_height());
+        //save height unsignedint val
+        write (fd,&buff,sizeof(unsigned));
+        //save objects char: n
+        write (fd,"n",1);
+
+         sprintf(&buff,"%d",map_objects());
+        //save objects unsignedint val
+        write (fd,&buff,sizeof(unsigned));
+
+
+
+
+    }
+    else
+    {
+        perror("errerui");
+        }
+        int obj;
+   for (int x = 0; x < map_height(); x++)
    {
         for(int y = 0; y < map_width(); y++)
         {
-
+            obj = map_get(x,y);
+            printf("%d \n",map_get_name(obj));
         }
    }
-
+    close(fd);
   fprintf (stderr, "Sorry: Map save is not yet implemented\n");
 }
 
 void map_load (char *filename)
 {
-  // TODO
-  exit_with_error ("Map load is not yet implemented\n");
+  int fd = open(filename,O_RDONLY);
+  if(fd!=-1)
+  {
+      unsigned buffInt ;
+      char buff;
+      write(1,"entree \n",7);
+      int i=0;
+      int r ;
+      lseek(fd,SEEK_SET,1);
+     r=read(fd,&buff,sizeof(unsigned));
+
+         write(1,&buff,r);
+
+
+       /*
+      int r = read(fd,&buff,1);
+      if(r>0)
+          r= read(fd,&buffInt,sizeof(unsigned int));
+
+      write(1,&buffInt,sizeof(unsigned int ));
+       write(1,"  after \n",7);
+        */
+      close(fd);
+  }
+
+ // exit_with_error ("Map load is not yet implemented\n");
 }
 
 #endif
