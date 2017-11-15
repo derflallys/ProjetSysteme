@@ -23,11 +23,10 @@ void map_new (unsigned width, unsigned height)
 
   map_object_begin (8);
 
-
-  // Mur
-  map_object_add ("images/wall.png", 1, MAP_OBJECT_SOLID);
   // Texture pour le sol
   map_object_add ("images/ground.png", 1, MAP_OBJECT_SOLID);
+  // Mur
+  map_object_add ("images/wall.png", 1, MAP_OBJECT_SOLID);
   // Gazon
   map_object_add ("images/grass.png", 1, MAP_OBJECT_SEMI_SOLID);
   // Marbre
@@ -65,9 +64,9 @@ void map_save (char *filename)
         //save objects unsignedint val
         write (fd,&buff,sizeof(unsigned));
         int obj;
-        for (int x = 0; x < map_width(); x++)
+        for (int x = 1; x < map_width(); x++)
        {
-            for(int y = 0; y < map_height(); y++)
+            for(int y = 1; y < map_height(); y++)
             {
 
                 obj = map_get(x,y);
@@ -161,19 +160,41 @@ void map_load (char *filename)
           int dest;
           int collect;
           int gener;
-          char * name [100];
-          while((r=read(fd,&buff,sizeof(unsigned)))>0 )
+          char * name = malloc(1);
+          while(i<6 ?(r=read(fd,&buff,sizeof(unsigned)))>0 : (r=read(fd,&buff,1))>0  )
           {
               if(i>=6)
               {
+                strcpy(name,&buff);
+                write(1,&buff,r);
                 while((r=read(fd,&buff,1))>0)
                 {
-                      // strcat(&name,&buff);
+                       name=realloc(name,1);
+                       if(name!=NULL)
+                       {
+                        strcat(name,&buff);
+                       }
+                      //
                       write(1,&buff,r);
                  }
                 // write(1,name,sizeof(name));
                  i=0;
-                // map_object_add (&name, frame,solid frame>1 ? & : |  dest!= 0 ? );
+                 if(strcmp(name,"images/coin.png")==0)
+                 {
+                    //TODO
+                   // map_object_add (name, frame,solid & );
+                 }else
+                 if(strcmp(name,"images/marble.png")==0)
+                 {
+                    //TODO
+                    //map_object_add (name, frame,solid  |   );
+                 }
+                 else
+                 {
+                    //TODO
+                   // map_object_add (name, frame,solid frame>1   );
+                 }
+
 
               }
                else
