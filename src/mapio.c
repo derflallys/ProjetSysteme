@@ -53,18 +53,18 @@ void map_save (char *filename)
     if(fd !=-1)
     {
         //save width char: w
-        write (fd,"w",1);
+       // write (fd,"w",1);
         sprintf(&buff,"%d",map_width());
         //save width unsignedint val
         write (fd,&buff,sizeof(unsigned));
 
          //save height char: h
-            write (fd,"h",1);
+        //    write (fd,"h",1);
             sprintf(&buff,"%d",map_height());
         //save height unsignedint val
         write (fd,&buff,sizeof(unsigned));
         //save objects char: n
-        write (fd,"n",1);
+      //  write (fd,"n",1);
 
          sprintf(&buff,"%d",map_objects());
         //save objects unsignedint val
@@ -79,12 +79,12 @@ void map_save (char *filename)
         perror("errerui");
         }
         int obj;
-   for (int x = 0; x < map_height(); x++)
+   for (int x = 0; x < map_width(); x++)
    {
-        for(int y = 0; y < map_width(); y++)
+        for(int y = 0; y < map_height(); y++)
         {
             obj = map_get(x,y);
-            printf("%d \n",map_get_name(obj));
+            printf("%d \n",map_get_solidity(obj));
         }
    }
     close(fd);
@@ -98,13 +98,73 @@ void map_load (char *filename)
   {
       unsigned buffInt ;
       char buff;
-      write(1,"entree \n",7);
+
       int i=0;
       int r ;
-      lseek(fd,SEEK_SET,1);
+      //lseek(fd,SEEK_SET,1);
      r=read(fd,&buff,sizeof(unsigned));
+           int width = atoi(&buff);
 
          write(1,&buff,r);
+         r=read(fd,&buff,sizeof(unsigned));
+         int height = atoi(&buff);
+
+         write(1,&buff,r);
+         r=read(fd,&buff,sizeof(unsigned));
+         int nbobject = atoi(&buff);
+
+         write(1,&buff,r);
+
+         map_allocate (width, height);
+          for (int x = 0; x < width; x++)
+            map_set (x, height - 1, 0); // Ground
+
+          for (int y = 0; y < height - 1; y++) {
+            map_set (0, y, 1); // Wall
+            map_set (width - 1, y, 1); // Wall
+          }
+
+          map_object_begin (nbobject);
+          int i = 0 ;
+          int obj ;
+          int frame;
+          int solid;
+          int dest;
+          int collect;
+          int gener;
+          char name [100];
+          while(r=read(fd,&buff,sizeof(unsigned))>0)
+          {
+              if(i>=6)
+              {
+                while(r=read(fd,&buff,1)>0)
+                {
+                       strcat(&name,&buff);
+                 }
+                 i==0;
+                // map_object_add (&name, frame,solid frame>1 ? & : |  dest!= 0 ? );
+
+              }
+              else
+              {
+                    if(i==0)
+                        obj = atoi(&buff);
+                    if(i==1)
+                        frame= atoi(&buff);
+                    if(i==2)
+                        solid = atoi(&buff);
+                    if(i==3)
+                        dest = aoti(&buff);
+                    if(i==4)
+                        collect= atoi(&buff);
+                    if(i==5)
+                        gener= atoi(&buff);
+
+
+              }
+              i++;
+
+          }
 
 
        /*
