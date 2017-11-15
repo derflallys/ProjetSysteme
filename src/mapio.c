@@ -23,10 +23,11 @@ void map_new (unsigned width, unsigned height)
 
   map_object_begin (8);
 
-  // Texture pour le sol
-  map_object_add ("images/ground.png", 1, MAP_OBJECT_SOLID);
+
   // Mur
   map_object_add ("images/wall.png", 1, MAP_OBJECT_SOLID);
+  // Texture pour le sol
+  map_object_add ("images/ground.png", 1, MAP_OBJECT_SOLID);
   // Gazon
   map_object_add ("images/grass.png", 1, MAP_OBJECT_SEMI_SOLID);
   // Marbre
@@ -46,49 +47,77 @@ void map_new (unsigned width, unsigned height)
 
 void map_save (char *filename)
 {
-    unsigned int buffInt;
+
     char buff;
 
    int fd = open(filename,O_CREAT|O_WRONLY|O_TRUNC,0666);
     if(fd !=-1)
     {
         //save width char: w
-       // write (fd,"w",1);
         sprintf(&buff,"%d",map_width());
         //save width unsignedint val
         write (fd,&buff,sizeof(unsigned));
-
-         //save height char: h
-        //    write (fd,"h",1);
-            sprintf(&buff,"%d",map_height());
+        sprintf(&buff,"%d",map_height());
         //save height unsignedint val
         write (fd,&buff,sizeof(unsigned));
         //save objects char: n
-      //  write (fd,"n",1);
-
          sprintf(&buff,"%d",map_objects());
         //save objects unsignedint val
         write (fd,&buff,sizeof(unsigned));
+        int obj;
+        for (int x = 0; x < map_width(); x++)
+       {
+            for(int y = 0; y < map_height(); y++)
+            {
 
+                obj = map_get(x,y);
+                if(obj!=-1)
+                {
+                    printf("(%d,%d) \n",x,y);
+                    write(fd,&obj,sizeof(unsigned));
+                   // printf("%d \n",map_get(x,y));
+                    //frame
+                    sprintf(&buff,"%d",map_get_frames(obj));
+                    write(fd,&buff,sizeof(unsigned));
+                   // printf("%d \n",map_get_frames(obj));
+                    //solid
+                    sprintf(&buff,"%d",map_get_solidity(obj));
+                    write(fd,&buff,sizeof(unsigned));
+                   // printf("%d \n",map_get_solidity(obj));
+                    //destr
+                    sprintf(&buff,"%d",map_is_destructible(obj));
+                    write(fd,&buff,sizeof(unsigned));
+                   // printf("%d \n",map_is_destructible(obj));
+                    //collect
+                    sprintf(&buff,"%d",map_is_collectible(obj));
+                    write(fd,&buff,sizeof(unsigned));
+                 //   printf("%d \n",map_is_collectible(obj));
+                    //generator
+                    sprintf(&buff,"%d",map_is_generator(obj));
+                    write(fd,&buff,sizeof(unsigned));
+                  //  printf("%d \n",map_is_generator(obj));
+                    //name
+                    //sprintf(&buff,"%s",map_get_name(obj));
+                    write(fd,map_get_name(obj),strlen(map_get_name(obj))*sizeof(char));
 
+                   printf("%s \n",map_get_name(obj));
+                }
+                else
+                {
 
+                }
+            }
 
+        }
     }
     else
     {
         perror("errerui");
-        }
-        int obj;
-   for (int x = 0; x < map_width(); x++)
-   {
-        for(int y = 0; y < map_height(); y++)
-        {
-            obj = map_get(x,y);
-            printf("%d \n",map_get_solidity(obj));
-        }
-   }
+    }
+
+
     close(fd);
-  fprintf (stderr, "Sorry: Map save is not yet implemented\n");
+  //fprintf (stderr, "Sorry: Map save is not yet implemented\n");
 }
 
 void map_load (char *filename)
@@ -96,7 +125,7 @@ void map_load (char *filename)
   int fd = open(filename,O_RDONLY);
   if(fd!=-1)
   {
-      unsigned buffInt ;
+
       char buff;
 
       int i=0;
@@ -125,46 +154,58 @@ void map_load (char *filename)
           }
 
           map_object_begin (nbobject);
-          int i = 0 ;
+
           int obj ;
           int frame;
           int solid;
           int dest;
           int collect;
           int gener;
-          char name [100];
-          while(r=read(fd,&buff,sizeof(unsigned))>0)
+          char * name [100];
+          while((r=read(fd,&buff,sizeof(unsigned)))>0 )
           {
               if(i>=6)
               {
-                while(r=read(fd,&buff,1)>0)
+                while((r=read(fd,&buff,1))>0)
                 {
-                       strcat(&name,&buff);
+                      // strcat(&name,&buff);
+                      write(1,&buff,r);
                  }
-                 i==0;
+                // write(1,name,sizeof(name));
+                 i=0;
                 // map_object_add (&name, frame,solid frame>1 ? & : |  dest!= 0 ? );
 
               }
-              else
-              {
+               else
+               {
                     if(i==0)
                         obj = atoi(&buff);
+
                     if(i==1)
                         frame= atoi(&buff);
+
                     if(i==2)
                         solid = atoi(&buff);
+
                     if(i==3)
-                        dest = aoti(&buff);
+                        dest = atoi(&buff);
+
                     if(i==4)
                         collect= atoi(&buff);
+
                     if(i==5)
                         gener= atoi(&buff);
 
+                    write(1,&buff,r);
+               }
 
-              }
+
+
+
               i++;
 
           }
+
 
 
        /*
