@@ -54,35 +54,33 @@ void map_save (char *filename)
     {
         //save width char: w
         sprintf(&buff,"%d",map_width());
-        write (fd,&buff,sizeof(unsigned));
-
-
-
+        w=write (fd,&buff,sizeof(unsigned));
+        if(w==-1)
+            exit_with_error ("Erreur d'ecriture\n");
         //save height
         sprintf(&buff,"%d",map_height());
-        write (fd,&buff,sizeof(unsigned));
-
+        w=write (fd,&buff,sizeof(unsigned));
+        if(w==-1)
+            exit_with_error ("Erreur d'ecriture\n");
         //save objects char: n
         sprintf(&buff,"%d",map_objects());
-        write (fd,&buff,sizeof(unsigned));
-
+        w=write (fd,&buff,sizeof(unsigned));
+        if(w==-1)
+            exit_with_error ("Erreur d'ecriture\n");
         unsigned obj;
-        unsigned nbelmts = 0;
+        int nbelmts = 0;
 
          for (int x = 0; x < map_width(); x++)
-           {
+         {
                 for(int y = 0; y < map_height(); y++)
                 {
                     obj = map_get(x,y);
                     if(obj!=-1)
-                    {
                         nbelmts++;
-                     }
-
                 }
-           }
-        sprintf(&buff,"%d",nbelmts);
-        write(fd,&buff,sizeof(unsigned));
+         }
+
+         write(fd,&nbelmts,sizeof( int));
 
 
         for (int x = 0; x < map_width(); x++)
@@ -94,52 +92,58 @@ void map_save (char *filename)
                 if(obj!=-1)
                 {
 
-                    sprintf(&buff,"%d",obj);
-                    write(fd,&buff,sizeof(unsigned));
+                    //sprintf(&buff,"%d",obj);
+                    write(fd,&obj,sizeof(int));
 
-                    sprintf(&buff,"%d",x);
-                    write(fd,&buff,sizeof(unsigned));
+                    //sprintf(&buff,"%d",x);
+                    write(fd,&x,sizeof(int));
 
-                    sprintf(&buff,"%d",y);
-                    write(fd,&buff,sizeof(unsigned));
+                    //sprintf(&buff,"%d",y);
+                    write(fd,&y,sizeof(int));
                    // printf("%d \n",map_get(x,y));
 
                 }
 
             }
         }
-        unsigned lname;
+        int lnames=0;
 
         for(int i=0;i<map_objects();i++)
         {
-            printf("%d \n",i);
+            //frame
             sprintf(&buff,"%d",map_get_frames(i));
             w=write(fd,&buff,sizeof(unsigned));
             if(w==-1)
                     exit_with_error ("Erreur de lecture\n");
+            //solidity
             sprintf(&buff,"%d",map_get_solidity(i));
             w=write(fd,&buff,sizeof(unsigned));
             if(w==-1)
                     exit_with_error ("Erreur de lecture\n");
+            //destrictible
             sprintf(&buff,"%d",map_is_destructible(i));
             w=write(fd,&buff,sizeof(unsigned));
             if(w==-1)
                     exit_with_error ("Erreur de lecture\n");
+            //collectible
             sprintf(&buff,"%d",map_is_collectible(i));
             w=write(fd,&buff,sizeof(unsigned));
             if(w==-1)
                     exit_with_error ("Erreur de lecture\n");
+            //generator
             sprintf(&buff,"%d",map_is_generator(i));
             w=write(fd,&buff,sizeof(unsigned));
             if(w==-1)
                     exit_with_error ("Erreur de lecture\n");
-            lname = strlen(map_get_name(i));
-            sprintf(&buff,"%d",lname);
-
-            w=write(fd,&buff,sizeof(unsigned));
+            //longueur name
+            lnames = strlen(map_get_name(i));
+            //printf("%s \n",map_get_name(i));
+            //printf("taille : %d \n",strlen(map_get_name(i)));
+            w=write(fd,&lnames,sizeof(int));
             if(w==-1)
                     exit_with_error ("Erreur de lecture\n");
-            w=write(fd,map_get_name(i),strlen(map_get_name(i)));
+            //name
+            w=write(fd,map_get_name(i),lnames);
             if(w==-1)
                     exit_with_error ("Erreur de lecture\n");
 
@@ -150,10 +154,8 @@ void map_save (char *filename)
     {
         perror("erreur ouverture fichier");
     }
-
-
     close(fd);
-  fprintf (stderr, "Sorry: Map save is not yet implemented\n");
+   fprintf (stdout, "Maps saved\n");
 }
 
 void map_load (char *filename)
@@ -164,6 +166,17 @@ void map_load (char *filename)
 
       char buff;
       int r ;
+      int nbelmts;
+      int obj ;
+      int x;
+      int y;
+      unsigned frame;
+      unsigned solid;
+      unsigned dest;
+      unsigned collect;
+      unsigned gener;
+      int lname;
+      char * filename ;
 
      r=read(fd,&buff,sizeof(unsigned));
      int width = atoi(&buff);
@@ -177,33 +190,25 @@ void map_load (char *filename)
      int nbobject = atoi(&buff);
      //write(1,&buff,r);
 
-     r=read(fd,&buff,sizeof(unsigned));
-     int nbelmts = atoi(&buff);
-     //write(1,&buff,r);
+     r=read(fd,&nbelmts,sizeof(int));
+
+     //printf("%d \n",nbelmts);
 
 
      map_allocate (width, height);
-     unsigned obj ;
-     unsigned x;
-     unsigned y;
-     unsigned frame;
-     unsigned solid;
-     unsigned dest;
-     unsigned collect;
-     unsigned gener;
-     unsigned lname;
 
+     //printf("%d \n",nbelmts);
      for(int i= 0 ; i<nbelmts;i++)
      {
-        r=read(fd,&buff,sizeof(unsigned));
-        obj = atoi(&buff);
-        r=read(fd,&buff,sizeof(unsigned));
-        x = atoi(&buff);
-        r=read(fd,&buff,sizeof(unsigned));
-        y = atoi(&buff);
+        r=read(fd,&obj,sizeof(int));
+
+        r=read(fd,&x,sizeof(int));
+
+        r=read(fd,&y,sizeof(int));
+
 
         map_set (x, y,obj);
-
+        //printf("%d \n",i);
      }
 
 
@@ -237,21 +242,26 @@ void map_load (char *filename)
                     exit_with_error ("Erreur de lecture\n");
                 gener = atoi(&buff);
                 //lname
-                r=read(fd,&buff,sizeof(unsigned));
+                r=read(fd,&lname,sizeof(int));
                 if(r==-1)
                     exit_with_error ("Erreur de lecture\n");
-                lname = atoi(&buff);
-                write(1,&lname,r);
-                //name
-                r=read(fd,&buff,lname);
-                if(r==-1)
-                    exit_with_error ("Erreur de lecture\n");
-                write(1,&buff,r);
 
-                map_object_add (&buff, frame, solid | dest | frame | collect | gener );
+                //printf("length : %d \n",lname);
+                //name
+
+                filename = malloc(lname+1);
+                r=read(fd,filename,lname);
+
+                if(r==-1)
+                    exit_with_error ("Erreur de lecture\n");
+                printf("name : %s \n",filename);
+
+                map_object_add (filename, frame, solid | dest | frame | collect | gener );
+                //free(filename);
+                lname=0;
             }
             map_object_end ();
-
+            free(filename);
      }
     else
     {
@@ -260,9 +270,7 @@ void map_load (char *filename)
      }
 
       close(fd);
-  }
-
- // exit_with_error ("Map load is not yet implemented\n");
-
+      // exit_with_error ("Map load is not yet implemented\n");
+}
 
 #endif
