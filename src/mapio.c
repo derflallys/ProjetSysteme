@@ -38,7 +38,7 @@ void map_new (unsigned width, unsigned height)
    // Fleur
   map_object_add ("images/flower.png", 1, MAP_OBJECT_AIR);
    // Coins
-  map_object_add ("images/coin.png", 20, MAP_OBJECT_AIR &  MAP_OBJECT_COLLECTIBLE);
+  map_object_add ("images/coin.png", 20, MAP_OBJECT_AIR |  MAP_OBJECT_COLLECTIBLE);
 
 
   map_object_end ();
@@ -64,54 +64,78 @@ void map_save (char *filename)
         //save objects unsignedint val
         write (fd,&buff,sizeof(unsigned));
         int obj;
-        for (int x = 1; x < map_width(); x++)
+        unsigned nbelmts = 0;
+
+         for (int x = 0; x < map_width(); x++)
+           {
+                for(int y = 0; y < map_height(); y++)
+                {
+                    obj = map_get(x,y);
+                    if(obj!=-1)
+                    {
+                        nbelmts++;
+                     }
+
+                }
+           }
+        sprintf(&buff,"%d",nbelmts);
+        write(fd,&buff,sizeof(unsigned));
+
+
+        for (int x = 0; x < map_width(); x++)
        {
-            for(int y = 1; y < map_height(); y++)
+            for(int y = 0; y < map_height(); y++)
             {
 
                 obj = map_get(x,y);
                 if(obj!=-1)
                 {
-                    printf("(%d,%d) \n",x,y);
-                    write(fd,&obj,sizeof(unsigned));
+
+                    //printf("(%d,%d) \n",x,y);
+                    sprintf(&buff,"%d",obj);
+                    write(fd,&buff,sizeof(unsigned));
+
+                    sprintf(&buff,"%d",x);
+                    write(fd,&buff,sizeof(unsigned));
+
+                    sprintf(&buff,"%d",y);
+                    write(fd,&buff,sizeof(unsigned));
                    // printf("%d \n",map_get(x,y));
-                    //frame
-                    sprintf(&buff,"%d",map_get_frames(obj));
-                    write(fd,&buff,sizeof(unsigned));
-                   // printf("%d \n",map_get_frames(obj));
-                    //solid
-                    sprintf(&buff,"%d",map_get_solidity(obj));
-                    write(fd,&buff,sizeof(unsigned));
-                   // printf("%d \n",map_get_solidity(obj));
-                    //destr
-                    sprintf(&buff,"%d",map_is_destructible(obj));
-                    write(fd,&buff,sizeof(unsigned));
-                   // printf("%d \n",map_is_destructible(obj));
-                    //collect
-                    sprintf(&buff,"%d",map_is_collectible(obj));
-                    write(fd,&buff,sizeof(unsigned));
-                 //   printf("%d \n",map_is_collectible(obj));
-                    //generator
-                    sprintf(&buff,"%d",map_is_generator(obj));
-                    write(fd,&buff,sizeof(unsigned));
-                  //  printf("%d \n",map_is_generator(obj));
-                    //name
-                    //sprintf(&buff,"%s",map_get_name(obj));
-                    write(fd,map_get_name(obj),strlen(map_get_name(obj))*sizeof(char));
-
-                   printf("%s \n",map_get_name(obj));
-                }
-                else
-                {
 
                 }
+
             }
+        }
+        unsigned lname;
+        for(int i=0;i<map_objects();i++)
+        {
+                    printf("%d \n",i);
+                    sprintf(&buff,"%d",map_get_frames(i));
+                    write(fd,&buff,sizeof(unsigned));
 
+                    sprintf(&buff,"%d",map_get_solidity(i));
+                    write(fd,&buff,sizeof(unsigned));
+
+                    sprintf(&buff,"%d",map_is_destructible(i));
+                    write(fd,&buff,sizeof(unsigned));
+
+                    sprintf(&buff,"%d",map_is_collectible(i));
+                    write(fd,&buff,sizeof(unsigned));
+
+                    sprintf(&buff,"%d",map_is_generator(i));
+                    write(fd,&buff,sizeof(unsigned));
+                    lname = strlen(map_get_name(i));
+                    printf("%d ",lname);
+                    sprintf(&buff,"%d",lname);
+                    write(fd,&buff,sizeof(unsigned));
+                    write(fd,map_get_name(i),lname);
+
+                   printf("%s \n",map_get_name(i));
         }
     }
     else
     {
-        perror("errerui");
+        perror("erreur ouverture fichier");
     }
 
 
@@ -126,121 +150,106 @@ void map_load (char *filename)
   {
 
       char buff;
-
-      int i=0;
       int r ;
-      //lseek(fd,SEEK_SET,1);
+
      r=read(fd,&buff,sizeof(unsigned));
-           int width = atoi(&buff);
+     int width = atoi(&buff);
+     //write(1,&buff,r);
 
-         write(1,&buff,r);
-         r=read(fd,&buff,sizeof(unsigned));
-         int height = atoi(&buff);
+     r=read(fd,&buff,sizeof(unsigned));
+     int height = atoi(&buff);
+     //write(1,&buff,r);
 
-         write(1,&buff,r);
-         r=read(fd,&buff,sizeof(unsigned));
-         int nbobject = atoi(&buff);
+     r=read(fd,&buff,sizeof(unsigned));
+     int nbobject = atoi(&buff);
+     //write(1,&buff,r);
 
-         write(1,&buff,r);
+     r=read(fd,&buff,sizeof(unsigned));
+     int nbelmts = atoi(&buff);
+     //write(1,&buff,r);
 
-         map_allocate (width, height);
-          for (int x = 0; x < width; x++)
-            map_set (x, height - 1, 0); // Ground
 
-          for (int y = 0; y < height - 1; y++) {
-            map_set (0, y, 1); // Wall
-            map_set (width - 1, y, 1); // Wall
-          }
+     map_allocate (width, height);
+     unsigned obj ;
+     unsigned x;
+     unsigned y;
+     unsigned frame;
+     unsigned solid;
+     unsigned dest;
+     unsigned collect;
+     unsigned gener;
+     unsigned lname;
 
-          map_object_begin (nbobject);
+     for(int i= 0 ; i<nbelmts;i++)
+     {
+        r=read(fd,&buff,sizeof(unsigned));
+        obj = atoi(&buff);
+        r=read(fd,&buff,sizeof(unsigned));
+        x = atoi(&buff);
+        r=read(fd,&buff,sizeof(unsigned));
+        y = atoi(&buff);
 
-          int obj ;
-          int frame;
-          int solid;
-          int dest;
-          int collect;
-          int gener;
-          char * name = malloc(1);
-          while(i<6 ?(r=read(fd,&buff,sizeof(unsigned)))>0 : (r=read(fd,&buff,1))>0  )
-          {
-              if(i>=6)
-              {
-                strcpy(name,&buff);
+        map_set (x, y,obj);
+
+     }
+
+
+     map_object_begin (nbobject);
+
+     for(int i= 0 ; i<nbobject;i++)
+            {
+                //frame
+                r=read(fd,&buff,sizeof(unsigned));
+                if(r==-1)
+                    exit_with_error ("Erreur de lecture\n");
+                frame = atoi(&buff);
+                //solid
+                r=read(fd,&buff,sizeof(unsigned));
+                if(r==-1)
+                    exit_with_error ("Erreur de lecture\n");
+                solid = atoi(&buff);
+                //dest
+                r=read(fd,&buff,sizeof(unsigned));
+                if(r==-1)
+                    exit_with_error ("Erreur de lecture\n");
+                dest = atoi(&buff);
+                //collect
+                r=read(fd,&buff,sizeof(unsigned));
+                if(r==-1)
+                    exit_with_error ("Erreur de lecture\n");
+                collect = atoi(&buff);
+                //gener
+                r=read(fd,&buff,sizeof(unsigned));
+                if(r==-1)
+                    exit_with_error ("Erreur de lecture\n");
+                gener = atoi(&buff);
+                //lname
+                r=read(fd,&buff,sizeof(unsigned));
+                if(r==-1)
+                    exit_with_error ("Erreur de lecture\n");
+                lname = atoi(&buff);
+                write(1,&lname,r);
+                //name
+                r=read(fd,&buff,lname);
+                if(r==-1)
+                    exit_with_error ("Erreur de lecture\n");
                 write(1,&buff,r);
-                while((r=read(fd,&buff,1))>0)
-                {
-                       name=realloc(name,1);
-                       if(name!=NULL)
-                       {
-                        strcat(name,&buff);
-                       }
-                      //
-                      write(1,&buff,r);
-                 }
-                // write(1,name,sizeof(name));
-                 i=0;
-                 if(strcmp(name,"images/coin.png")==0)
-                 {
-                    //TODO
-                   // map_object_add (name, frame,solid & );
-                 }else
-                 if(strcmp(name,"images/marble.png")==0)
-                 {
-                    //TODO
-                    //map_object_add (name, frame,solid  |   );
-                 }
-                 else
-                 {
-                    //TODO
-                   // map_object_add (name, frame,solid frame>1   );
-                 }
 
+                map_object_add (&buff, frame, solid | dest | frame | collect | gener );
+            }
+            map_object_end ();
 
-              }
-               else
-               {
-                    if(i==0)
-                        obj = atoi(&buff);
+     }
+    else
+    {
+        perror("Erreur de open");
+        EXIT_FAILURE;
+     }
 
-                    if(i==1)
-                        frame= atoi(&buff);
-
-                    if(i==2)
-                        solid = atoi(&buff);
-
-                    if(i==3)
-                        dest = atoi(&buff);
-
-                    if(i==4)
-                        collect= atoi(&buff);
-
-                    if(i==5)
-                        gener= atoi(&buff);
-
-                    write(1,&buff,r);
-               }
-
-
-
-
-              i++;
-
-          }
-
-
-
-       /*
-      int r = read(fd,&buff,1);
-      if(r>0)
-          r= read(fd,&buffInt,sizeof(unsigned int));
-
-      write(1,&buffInt,sizeof(unsigned int ));
-       write(1,"  after \n",7);
-        */
       close(fd);
   }
 
  // exit_with_error ("Map load is not yet implemented\n");
-}
+
 
 #endif
