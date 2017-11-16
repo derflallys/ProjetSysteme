@@ -176,7 +176,7 @@ void map_load (char *filename)
       unsigned collect;
       unsigned gener;
       int lname;
-      char * filename ;
+
 
      r=read(fd,&buff,sizeof(unsigned));
      int width = atoi(&buff);
@@ -216,6 +216,7 @@ void map_load (char *filename)
 
      for(int i= 0 ; i<nbobject;i++)
             {
+                char * filename ;
                 //frame
                 r=read(fd,&buff,sizeof(unsigned));
                 if(r==-1)
@@ -241,6 +242,7 @@ void map_load (char *filename)
                 if(r==-1)
                     exit_with_error ("Erreur de lecture\n");
                 gener = atoi(&buff);
+                printf("gener : %d \n",gener);
                 //lname
                 r=read(fd,&lname,sizeof(int));
                 if(r==-1)
@@ -249,19 +251,28 @@ void map_load (char *filename)
                 //printf("length : %d \n",lname);
                 //name
 
-                filename = malloc(lname+1);
+                filename = malloc(lname);
+                if(filename==NULL)
+                    {
+                        fprintf(stderr,"Erreur malloc \n");
+                        EXIT_FAILURE;
+                    }
                 r=read(fd,filename,lname);
+                filename[lname]='\0';
 
                 if(r==-1)
                     exit_with_error ("Erreur de lecture\n");
-                printf("name : %s \n",filename);
+                printf("%s \n",filename);
+
 
                 map_object_add (filename, frame, solid | dest | frame | collect | gener );
                 //free(filename);
-                lname=0;
+
+
             }
             map_object_end ();
             free(filename);
+            fprintf(stdout,"Map Load");
      }
     else
     {
