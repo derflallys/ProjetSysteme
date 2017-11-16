@@ -48,22 +48,25 @@ void map_save (char *filename)
 {
 
     char buff;
-
-   int fd = open(filename,O_CREAT|O_WRONLY|O_TRUNC,0666);
+    int w;
+    int fd = open(filename,O_CREAT|O_WRONLY|O_TRUNC,0666);
     if(fd !=-1)
     {
         //save width char: w
         sprintf(&buff,"%d",map_width());
-        //save width unsignedint val
         write (fd,&buff,sizeof(unsigned));
+
+
+
+        //save height
         sprintf(&buff,"%d",map_height());
-        //save height unsignedint val
         write (fd,&buff,sizeof(unsigned));
+
         //save objects char: n
-         sprintf(&buff,"%d",map_objects());
-        //save objects unsignedint val
+        sprintf(&buff,"%d",map_objects());
         write (fd,&buff,sizeof(unsigned));
-        int obj;
+
+        unsigned obj;
         unsigned nbelmts = 0;
 
          for (int x = 0; x < map_width(); x++)
@@ -91,7 +94,6 @@ void map_save (char *filename)
                 if(obj!=-1)
                 {
 
-                    //printf("(%d,%d) \n",x,y);
                     sprintf(&buff,"%d",obj);
                     write(fd,&buff,sizeof(unsigned));
 
@@ -107,30 +109,41 @@ void map_save (char *filename)
             }
         }
         unsigned lname;
+
         for(int i=0;i<map_objects();i++)
         {
-                    printf("%d \n",i);
-                    sprintf(&buff,"%d",map_get_frames(i));
-                    write(fd,&buff,sizeof(unsigned));
+            printf("%d \n",i);
+            sprintf(&buff,"%d",map_get_frames(i));
+            w=write(fd,&buff,sizeof(unsigned));
+            if(w==-1)
+                    exit_with_error ("Erreur de lecture\n");
+            sprintf(&buff,"%d",map_get_solidity(i));
+            w=write(fd,&buff,sizeof(unsigned));
+            if(w==-1)
+                    exit_with_error ("Erreur de lecture\n");
+            sprintf(&buff,"%d",map_is_destructible(i));
+            w=write(fd,&buff,sizeof(unsigned));
+            if(w==-1)
+                    exit_with_error ("Erreur de lecture\n");
+            sprintf(&buff,"%d",map_is_collectible(i));
+            w=write(fd,&buff,sizeof(unsigned));
+            if(w==-1)
+                    exit_with_error ("Erreur de lecture\n");
+            sprintf(&buff,"%d",map_is_generator(i));
+            w=write(fd,&buff,sizeof(unsigned));
+            if(w==-1)
+                    exit_with_error ("Erreur de lecture\n");
+            lname = strlen(map_get_name(i));
+            sprintf(&buff,"%d",lname);
 
-                    sprintf(&buff,"%d",map_get_solidity(i));
-                    write(fd,&buff,sizeof(unsigned));
+            w=write(fd,&buff,sizeof(unsigned));
+            if(w==-1)
+                    exit_with_error ("Erreur de lecture\n");
+            w=write(fd,map_get_name(i),strlen(map_get_name(i)));
+            if(w==-1)
+                    exit_with_error ("Erreur de lecture\n");
 
-                    sprintf(&buff,"%d",map_is_destructible(i));
-                    write(fd,&buff,sizeof(unsigned));
 
-                    sprintf(&buff,"%d",map_is_collectible(i));
-                    write(fd,&buff,sizeof(unsigned));
-
-                    sprintf(&buff,"%d",map_is_generator(i));
-                    write(fd,&buff,sizeof(unsigned));
-                    lname = strlen(map_get_name(i));
-                    printf("%d ",lname);
-                    sprintf(&buff,"%d",lname);
-                    write(fd,&buff,sizeof(unsigned));
-                    write(fd,map_get_name(i),lname);
-
-                   printf("%s \n",map_get_name(i));
         }
     }
     else
@@ -140,7 +153,7 @@ void map_save (char *filename)
 
 
     close(fd);
-  //fprintf (stderr, "Sorry: Map save is not yet implemented\n");
+  fprintf (stderr, "Sorry: Map save is not yet implemented\n");
 }
 
 void map_load (char *filename)
