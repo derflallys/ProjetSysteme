@@ -57,16 +57,19 @@ void map_save (char *filename)
         w=write (fd,&buff,sizeof(unsigned));
         if(w==-1)
             exit_with_error ("Erreur d'ecriture\n");
+
         //save height
         sprintf(&buff,"%d",map_height());
         w=write (fd,&buff,sizeof(unsigned));
         if(w==-1)
             exit_with_error ("Erreur d'ecriture\n");
+
         //save objects char: n
         sprintf(&buff,"%d",map_objects());
         w=write (fd,&buff,sizeof(unsigned));
         if(w==-1)
             exit_with_error ("Erreur d'ecriture\n");
+
         unsigned obj;
         int nbelmts = 0;
 
@@ -92,8 +95,6 @@ void map_save (char *filename)
                 obj = map_get(x,y);
                 if(obj!=-1)
                 {
-
-
                     write(fd,&obj,sizeof(int));
                     if(w==-1)
                     exit_with_error ("Erreur d'ecriture\n");
@@ -156,7 +157,7 @@ void map_save (char *filename)
     }
     else
     {
-        perror("erreur ouverture fichier");
+        exit_with_error ("erreur ouverture fichier");
     }
     close(fd);
    fprintf (stdout, "Maps saved\n");
@@ -280,9 +281,7 @@ void map_load (char *filename)
                     exit_with_error ("Erreur de lecture\n");
 
 
-                printf("%s  %d  %d %d %d %d\n",filename,frame,solid,dest,collect,gener);
-                int f = (dest  | collect | gener);
-                printf("f:  %d \n",f);
+
                 if(strcmp(filename,"images/coin.png")==0)
                     map_object_add (filename, frame,   collect  ==1 ? solid | MAP_OBJECT_COLLECTIBLE : solid  );
                 else
@@ -296,16 +295,16 @@ void map_load (char *filename)
             }
             map_object_end ();
 
-            fprintf(stdout,"Map Load");
+            fprintf(stdout,"Map Load \n");
      }
     else
     {
-        perror("Erreur de open");
+        exit_with_error("Erreur de open");
         EXIT_FAILURE;
      }
 
       close(fd);
-      // exit_with_error ("Map load is not yet implemented\n");
+
 }
 
 #endif
