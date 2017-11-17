@@ -265,13 +265,13 @@ void map_load (char *filename)
                 printf("%s \n",filename);
 
 
-                map_object_add (filename, frame, solid | dest | frame | collect | gener );
-                //free(filename);
+                map_object_add (filename, frame, solid |dest  | collect | gener );
+                free(filename);
 
 
             }
             map_object_end ();
-            free(filename);
+
             fprintf(stdout,"Map Load");
      }
     else
