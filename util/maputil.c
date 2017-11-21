@@ -170,6 +170,96 @@ int main(int argc,char ** argv)
            }
        }
     }
+    if(argc==4)
+    {
+        char  * file = argv[1];
+        char * option =argv[2];
+        int hORw = atoi(argv[3]);
+        if(strcmp(option,"--setwidth")==0)
+        {
+            int width = getwidth(file);
+            if(width<hORw)
+            {
+                int fd = open(file,O_WRONLY,0666);
+                if(fd!=-1)
+                {
+                    int w = write(fd,&hORw,sizeof(int));
+                    if(w==-1)
+                    {
+                        perror("Erreur de ecriture du fichier");
+                        exit(0);
+                    }
+                    if(w==0)
+                    {
+                        perror("Zero caractere Ecrit");
+                        exit(0);
+                    }
+                    lseek(fd,3*sizeof(int),SEEK_SET);
+                    int nbelmts,r;
+                    r=read(fd,&nbelmts,sizeof(int));
+                    if(r==-1)
+                    {
+                        perror("Erreur de lecture \n");
+                        exit(0);
+                    }
+                    if(r==0)
+                    {
+                        perror("Zero caractere lu \n");
+                        exit(0);
+                    }
+                    for (int i = 0; i <nbelmts ; ++i) {
+
+                        int x,y,obj,r;
+                        r=read(fd,&obj,sizeof(int));
+                        if(r==-1)
+                        {
+                            perror("Erreur de lecture \n");
+                            exit(0);
+                        }
+                        if(r==0)
+                        {
+                            perror("Zero caractere lu \n");
+                            exit(0);
+                        }
+                        r=read(fd,&x,sizeof(int));
+                        if(r==-1)
+                        {
+                            perror("Erreur de lecture \n");
+                            exit(0);
+                        }
+                        if(r==0)
+                        {
+                            perror("Zero caractere lu \n");
+                            exit(0);
+                        }
+                        r=read(fd,&y,sizeof(int));
+                        if(r==-1)
+                        {
+                            perror("Erreur de lecture \n");
+                            exit(0);
+                        }
+                        if(r==0)
+                        {
+                            perror("Zero caractere lu \n");
+                            exit(0);
+                        }
+                        for (int j = 0; j < getheight(file); ++j) {
+                            if(obj==1 && x==width && y==i)
+                            {
+
+                            }
+                        }
+
+
+                    }
+                    close(fd);
+
+                }
+
+            }
+        }
+
+    }
 
 
 
