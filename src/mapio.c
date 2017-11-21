@@ -48,6 +48,7 @@ void map_save (char *filename)
 {
 
     char buff;
+    int buf;
     int w;
     /*
         Ouverture du fichier en ecriture seul avec comme option trunc pour sauvegarder une nouvelle version à chaque sauvegarde
@@ -61,23 +62,26 @@ void map_save (char *filename)
             Je sais ça prend plus de temps de sauvegarder un int en tant char car à la lecture je dois faire la transcription inverse , mais c'etait jusque pour voir
             en claire les int ecrient , donc j'ai fait la convertion en utilisant la fonction sprintf
         */
-        sprintf(&buff,"%d",map_width());
-        w=write (fd,&buff,sizeof(unsigned));
+        //sprintf(&buff,"%d",map_width());
+        buf= map_width();
+        w=write (fd,&buf,sizeof(int));
         if(w==-1)
             exit_with_error ("Erreur d'ecriture\n");
         if(w==0)
             exit_with_error (" Zero caractere lu \n");
         //save height
-        sprintf(&buff,"%d",map_height());
-        w=write (fd,&buff,sizeof(unsigned));
+        //sprintf(&buff,"%d",map_height());
+        buf= map_height();
+        w=write (fd,&buf,sizeof(int));
         if(w==-1)
             exit_with_error ("Erreur d'ecriture\n");
         if(w==0)
             exit_with_error (" Zero caractere lu \n");
 
         //save objects char: n
-        sprintf(&buff,"%d",map_objects());
-        w=write (fd,&buff,sizeof(unsigned));
+        //sprintf(&buff,"%d",map_objects());
+        buf= map_objects();
+        w=write (fd,&buf,sizeof(int));
         if(w==-1)
             exit_with_error ("Erreur d'ecriture\n");
         if(w==0)
@@ -227,28 +231,30 @@ void map_load (char *filename)
       int lname;
 
     //lecture du fichier dans lordes d'ecriture , si j'avais ecrit dans le fichier des ints en char apres lecture je les converties en int avec la fonction atoi
-     r=read(fd,&buff,sizeof(unsigned));
+     int width;
+     r=read(fd,&width,sizeof(int));
      if(r==-1)
         exit_with_error ("Erreur de lecture\n");
      if(r==0)
         exit_with_error ("Aucun caractere lu\n");
-     int width = atoi(&buff);
+     //int width = atoi(&buff);
+     printf(" w: %d \n",width);
 
-
-     r=read(fd,&buff,sizeof(unsigned));
+     int height;
+     r=read(fd,&height,sizeof(int));
      if(r==-1)
         exit_with_error ("Erreur de lecture\n");
      if(r==0)
         exit_with_error ("Aucun caractere lu\n");
-     int height = atoi(&buff);
+     //int height = atoi(&buff);
 
-
-     r=read(fd,&buff,sizeof(unsigned));
+    int nbobject ;
+     r=read(fd,&nbobject,sizeof(int));
      if(r==-1)
         exit_with_error ("Erreur de lecture\n");
      if(r==0)
         exit_with_error ("Aucun caractere lu\n");
-     int nbobject = atoi(&buff);
+     //int nbobject = atoi(&buff);
 
 
      r=read(fd,&nbelmts,sizeof(int));
