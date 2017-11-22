@@ -104,6 +104,41 @@ int getnbobjects(char  * file )
         return 0;
     }
 }
+int getnbelmts(char  * file )
+{
+    int fd = open(file,O_RDONLY);
+    int nbelmts;
+    int r;
+    int l ;
+    if (fd!=-1)
+    {
+        l=lseek(fd,3*sizeof(int),SEEK_SET);
+        if (l==-1)
+        {
+            perror("Erreur lseek \n");
+            exit(0);
+        }
+        r= read(fd,&nbelmts, sizeof(int));
+        if(r==-1)
+        {
+            perror("Erreur de lecture \n");
+            exit(0);
+        }
+        if(r==0)
+        {
+            perror("Zero caractere lu \n");
+            exit(0);
+        }
+        close(fd);
+        return nbelmts;
+
+    }
+    else
+    {
+        close(fd);
+        return 0;
+    }
+}
 
 
 
@@ -243,14 +278,82 @@ int main(int argc,char ** argv)
                             perror("Zero caractere lu \n");
                             exit(0);
                         }
+                        //changement des coordonnes du mur pour les mettre à la fin
                         for (int j = 0; j < getheight(file); ++j) {
-                            if(obj==1 && x==width && y==i)
+                            if(obj==1 && x==width-1 && y==i)
                             {
-
+                                lseek(fd,-2*sizeof(int),SEEK_CUR);
+                                w=write(fd,hORw-1,sizeof(int));
+                                if(w==-1)
+                                {
+                                    perror("Erreur de ecriture du fichier");
+                                    exit(0);
+                                }
+                                if(w==0)
+                                {
+                                    perror("Zero caractere Ecrit");
+                                    exit(0);
+                                }
+                                lseek(fd,sizeof(int),SEEK_CUR);
                             }
                         }
+                        int nbelmtssave = getnbelmts(file);
+                        int height = getheight(file);
+                        lseek(fd,3*sizeof(int),SEEK_SET);
+                        w=write(fd,hORw-width,sizeof(int));
+                        if(w==-1)
+                        {
+                            perror("Erreur de ecriture du fichier");
+                            exit(0);
+                        }
+                        if(w==0)
+                        {
+                            perror("Zero caractere Ecrit");
+                            exit(0);
+                        }
 
+                        close(fd);
+                        fd  = open(file,O_WRONLY|O_APPEND,0666);
+                        lseek(fd,4*sizeof(int)+nbelmtssave*(3*sizeof(int)),SEEK_SET);
+                        for (int k = width; k <hORw ; ++k) {
+                            //write de obj
+                            w=write(fd,0,sizeof(int));
+                            if(w==-1)
+                            {
+                                perror("Erreur de ecriture du fichier");
+                                exit(0);
+                            }
+                            if(w==0)
+                            {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            //write de x
+                            w=write(fd,k,sizeof(int));
+                            if(w==-1)
+                            {
+                                perror("Erreur de ecriture du fichier");
+                                exit(0);
+                            }
+                            if(w==0)
+                            {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            //write de y
+                            w=write(fd,height-1,sizeof(int));
+                            if(w==-1)
+                            {
+                                perror("Erreur de ecriture du fichier");
+                                exit(0);
+                            }
+                            if(w==0)
+                            {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
 
+                        }
                     }
                     close(fd);
 
