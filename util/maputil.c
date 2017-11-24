@@ -258,7 +258,7 @@ void createCopy(char * filesrc,char * filedest,int position,char * option)
             r= read(fd,&intbuf, sizeof(int));
             if(r==-1)
             {
-                perror("Erreur de lecture obj\n");
+                perror("Erreur de lecture obj dans save\n");
                 exit(0);
             }
             if(r==0)
@@ -269,7 +269,7 @@ void createCopy(char * filesrc,char * filedest,int position,char * option)
             w = write(fdbackup,&intbuf,sizeof(int));
             if(w==-1)
             {
-                perror("Erreur de ecriture du fichier obj");
+                perror("Erreur de ecriture du fichier obj dans save");
                 exit(0);
             }
             if(w==0)
@@ -456,8 +456,6 @@ void createCopy(char * filesrc,char * filedest,int position,char * option)
             perror("Zero caractere Ecrit");
             exit(0);
         }
-
-
 
         //name
         //J'alloue de la memoire à filename avec le nombre de caractere de la chaine lie dans le fichier  avec malloc
@@ -781,15 +779,148 @@ int main(int argc,char ** argv)
                 }
 
             }
-            else
-            {
+            else {
+                //si la nouvelle valeur est inferieur à l'ancienne valeur
+                char *filebackup = "backup.map";
+                createCopy(file, filebackup, 0, "trunc");
+                int fd = open(file, O_WRONLY | O_TRUNC, 0666);
+                int fdBackup;
+                int r, w;
+                int intbuff;
+                if (fd != -1) {
+                    w = write(fd, &hORw, sizeof(int));
+                    if (w == -1) {
+                        perror("Erreur de ecriture du fichier hOrw");
+                        exit(0);
+                    }
+                    if (w == 0) {
+                        perror("Zero caractere Ecrit");
+                        exit(0);
+                    }
+                    w = write(fd, &height, sizeof(int));
+                    if (w == -1) {
+                        perror("Erreur de ecriture du fichier height save");
+                        exit(0);
+                    }
+                    if (w == 0) {
+                        perror("Zero caractere Ecrit");
+                        exit(0);
+                    }
+                    w = write(fd, &nbobjets, sizeof(int));
+                    if (w == -1) {
+                        perror("Erreur de ecriture du fichier objects save");
+                        exit(0);
+                    }
+                    if (w == 0) {
+                        perror("Zero caractere Ecrit");
+                        exit(0);
+                    }
+                    int newnbelemts = nbelmtssave - (width - hORw) * height;
+                    w = write(fd, &newnbelemts, sizeof(int));
+                    if (w == -1) {
+                        perror("Erreur de ecriture du fichier nbelemts save");
+                        exit(0);
+                    }
+                    if (w == 0) {
+                        perror("Zero caractere Ecrit");
+                        exit(0);
+                    }
 
+                    fdBackup=open(filebackup,O_RDONLY);
+                    int vue;
+                    int x,y,obj;
+                    if(fdBackup!=-1) {
+
+                        lseek(fdBackup, 4 * sizeof(int), SEEK_SET);
+
+                        for (int i = 0; i < nbelmtssave; ++i) {
+                           // printf("i: %d \n", i);
+
+                            r = read(fdBackup, &obj, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture obj  backup\n");
+                                exit(0);
+                            }
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+                            r = read(fdBackup, &x, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture x \n");
+                                exit(0);
+                            }
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+                            r = read(fdBackup, &y, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture y \n");
+                                exit(0);
+                            }
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+                            int in = 0;
+                            for (int j = hORw; j < width; ++j) {
+                                if (x == j) {
+                                    in = 1;
+                                    break;
+                                }
+                            }
+
+                            if (in != 1) {
+                                //changement des coordonnes du mur pour les mettre à la fin
+                                w = write(fd, &obj, sizeof(int));
+                                if (w == -1) {
+                                    perror("Erreur de ecriture du fichier obj save");
+                                    exit(0);
+                                }
+                                if (w == 0) {
+                                    perror("Zero caractere Ecrit");
+                                    exit(0);
+                                }
+                                w = write(fd, &x, sizeof(int));
+                                if (w == -1) {
+                                    perror("Erreur de ecriture du fichier x save");
+                                    exit(0);
+                                }
+                                if (w == 0) {
+                                    perror("Zero caractere Ecrit");
+                                    exit(0);
+                                }
+                                w = write(fd, &y, sizeof(int));
+                                if (w == -1) {
+                                    perror("Erreur de ecriture du fichier y save");
+                                    exit(0);
+                                }
+                                if (w == 0) {
+                                    perror("Zero caractere Ecrit");
+                                    exit(0);
+                                }
+
+                            }
+                        }//fin add object
+                        close(fd);
+                        close(fdBackup);
+                        //fin add ground
+                        //ajout des caracteristique des objects
+                        int pos = 4*sizeof(int)+nbelmtssave*(3*sizeof(int));
+                        createCopy(filebackup,file,pos,"append");
+
+
+                    }
+
+
+                }
             }
         }
         else
             if(strcmp(option,"--setheight")==0)
             {
-                if(hORw>height)
+                if(hORw<20 && hORw>height)
                 {
                     //creer un backup du fichier save.map
                     char * filebackup ="backup.map";
