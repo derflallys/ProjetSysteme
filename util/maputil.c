@@ -332,7 +332,7 @@ void createCopy(char * filesrc,char * filedest,int position,char * option)
         lseek(fd,position,SEEK_SET);
     }
     //object caract
-    printf("nbobjects; %d",nbobjects);
+
     for(int i= 0 ; i<nbobjects;i++)
     {
         char * filename ;
@@ -474,6 +474,7 @@ void createCopy(char * filesrc,char * filedest,int position,char * option)
             perror("Zero caractere lu file \n");
             exit(0);
         }
+        filename[lname]='\0';
         //ensuite j'achete le caractere de fin de chaine
 
         w = write(fdbackup, filename, lname);
@@ -485,7 +486,8 @@ void createCopy(char * filesrc,char * filedest,int position,char * option)
             perror("Zero caractere Ecrit file\n");
             exit(0);
         }
-
+        //printf("%s \n",filename);
+        printf(" dans \n");
         //je libere l'espace allouer recemment
         free(filename);
     }
@@ -558,83 +560,70 @@ int main(int argc,char ** argv)
            }
        }
     }
-    if(argc==4)
-    {
-        char  * file = argv[1];
-        char * option =argv[2];
+    if(argc==4) {
+        char *file = argv[1];
+        char *option = argv[2];
         int hORw = atoi(argv[3]);
         int width = getwidth(file);
-        int height= getheight(file);
+        int height = getheight(file);
         int nbelmtssave = getnbelmts(file);
         int nbobjets = getnbobjects(file);
-        if(strcmp(option,"--setwidth")==0)
-        {
+        if (strcmp(option, "--setwidth") == 0) {
 
-            if(width<hORw)
-            {
+            if (width < hORw) {
                 //creer un backup du fichier save.map
-                char * filebackup ="backup.map";
-                createCopy(file,filebackup,0,"trunc");
-                int fd = open(file,O_WRONLY|O_TRUNC,0666);
-                int fdBackup ;
-                int r,w;
+                char *filebackup = "backup.map";
+                createCopy(file, filebackup, 0, "trunc");
+                int fd = open(file, O_WRONLY | O_TRUNC, 0666);
+                int fdBackup;
+                int r, w;
                 int intbuff;
-                if(fd!=-1)
-                {
-                    w = write(fd,&hORw,sizeof(int));
-                    if(w==-1)
-                    {
+                if (fd != -1) {
+                    w = write(fd, &hORw, sizeof(int));
+                    if (w == -1) {
                         perror("Erreur de ecriture du fichier hOrw");
                         exit(0);
                     }
-                    if(w==0)
-                    {
+                    if (w == 0) {
                         perror("Zero caractere Ecrit");
                         exit(0);
                     }
-                    w = write(fd,&height,sizeof(int));
-                    if(w==-1)
-                    {
+                    w = write(fd, &height, sizeof(int));
+                    if (w == -1) {
                         perror("Erreur de ecriture du fichier height save");
                         exit(0);
                     }
-                    if(w==0)
-                    {
+                    if (w == 0) {
                         perror("Zero caractere Ecrit");
                         exit(0);
                     }
-                    w = write(fd,&nbobjets,sizeof(int));
-                    if(w==-1)
-                    {
+                    w = write(fd, &nbobjets, sizeof(int));
+                    if (w == -1) {
                         perror("Erreur de ecriture du fichier objects save");
                         exit(0);
                     }
-                    if(w==0)
-                    {
+                    if (w == 0) {
                         perror("Zero caractere Ecrit");
                         exit(0);
                     }
-                    int newnbelemts = nbelmtssave+hORw-width;
-                    w = write(fd,&newnbelemts,sizeof(int));
-                    if(w==-1)
-                    {
+                    int newnbelemts = nbelmtssave + hORw - width;
+                    w = write(fd, &newnbelemts, sizeof(int));
+                    if (w == -1) {
                         perror("Erreur de ecriture du fichier nbelemts save");
                         exit(0);
                     }
-                    if(w==0)
-                    {
+                    if (w == 0) {
                         perror("Zero caractere Ecrit");
                         exit(0);
                     }
 
-                    fdBackup=open(filebackup,O_RDONLY);
+                    fdBackup = open(filebackup, O_RDONLY);
                     int vue;
-                    int x,y,obj;
-                    if(fdBackup!=-1)
-                    {
-                        lseek(fdBackup,4*sizeof(int),SEEK_SET);
+                    int x, y, obj;
+                    if (fdBackup != -1) {
+                        lseek(fdBackup, 4 * sizeof(int), SEEK_SET);
 
-                        for (int i = 0; i <nbelmtssave ; ++i) {
+                        for (int i = 0; i < nbelmtssave; ++i) {
 
 
                             r = read(fdBackup, &obj, sizeof(int));
@@ -666,103 +655,88 @@ int main(int argc,char ** argv)
                             }
 
                             //changement des coordonnes du mur pour les mettre à la fin
-                            w = write(fd,&obj,sizeof(int));
-                            if(w==-1)
-                            {
+                            w = write(fd, &obj, sizeof(int));
+                            if (w == -1) {
                                 perror("Erreur de ecriture du fichier obj save");
                                 exit(0);
                             }
-                            if(w==0)
-                            {
+                            if (w == 0) {
                                 perror("Zero caractere Ecrit");
                                 exit(0);
                             }
-                            vue=0;
+                            vue = 0;
                             for (int j = 0; j < height; ++j) {
 
                                 if (obj == 1 && x == width - 1 && y == j) {
 
-                                    x=hORw-1;
+                                    x = hORw - 1;
 
                                     //x
-                                    w = write(fd,&x,sizeof(int));
-                                    if(w==-1)
-                                    {
+                                    w = write(fd, &x, sizeof(int));
+                                    if (w == -1) {
                                         perror("Erreur de ecriture du fichier x save");
                                         exit(0);
                                     }
-                                    if(w==0)
-                                    {
+                                    if (w == 0) {
                                         perror("Zero caractere Ecrit");
                                         exit(0);
                                     }
-                                    vue=1;
+                                    vue = 1;
                                     break;
                                 }
                             }
-                            if(vue==0)
-                            {
-                                w = write(fd,&x,sizeof(int));
-                                if(w==-1)
-                                {
+                            if (vue == 0) {
+                                w = write(fd, &x, sizeof(int));
+                                if (w == -1) {
                                     perror("Erreur de ecriture du fichier x save");
                                     exit(0);
                                 }
-                                if(w==0)
-                                {
+                                if (w == 0) {
                                     perror("Zero caractere Ecrit");
                                     exit(0);
                                 }
                             }
-                            w = write(fd,&y,sizeof(int));
-                            if(w==-1)
-                            {
+                            w = write(fd, &y, sizeof(int));
+                            if (w == -1) {
                                 perror("Erreur de ecriture du fichier y save");
                                 exit(0);
                             }
-                            if(w==0)
-                            {
+                            if (w == 0) {
                                 perror("Zero caractere Ecrit");
                                 exit(0);
                             }
                         }
                         //fin save old elements
                         //completion du sols
-                        for (int l = width; l <hORw ; ++l) {
+                        for (int l = width; l < hORw; ++l) {
                             //obj
-                            obj=0;
-                            w = write(fd,&obj,sizeof(int));
-                            if(w==-1)
-                            {
+                            obj = 0;
+                            w = write(fd, &obj, sizeof(int));
+                            if (w == -1) {
                                 perror("Erreur de ecriture du fichier obj save");
                                 exit(0);
                             }
-                            if(w==0)
-                            {
+                            if (w == 0) {
                                 perror("Zero caractere Ecrit");
                                 exit(0);
                             }
-                            x=l;
-                            w = write(fd,&x,sizeof(int));
-                            if(w==-1)
-                            {
+                            x = l;
+                            w = write(fd, &x, sizeof(int));
+                            if (w == -1) {
                                 perror("Erreur de ecriture du fichier obj save");
                                 exit(0);
                             }
-                            if(w==0)
-                            {
+                            if (w == 0) {
                                 perror("Zero caractere Ecrit");
                                 exit(0);
                             }
-                            y=height-1;
-                            w = write(fd,&y,sizeof(int));
-                            if(w==-1)
-                            {
+                            y = height - 1;
+                            w = write(fd, &y, sizeof(int));
+                            if (w == -1) {
                                 perror("Erreur de ecriture du fichier obj save");
                                 exit(0);
                             }
-                            if(w==0)
-                            {
+                            if (w == 0) {
                                 perror("Zero caractere Ecrit");
                                 exit(0);
                             }
@@ -772,14 +746,13 @@ int main(int argc,char ** argv)
                         close(fdBackup);
                         //fin add ground
                         //ajout des caracteristique des objects
-                        int pos = 4*sizeof(int)+nbelmtssave*(3*sizeof(int));
-                        createCopy(filebackup,file,pos,"append");
+                        int pos = 4 * sizeof(int) + nbelmtssave * (3 * sizeof(int));
+                        createCopy(filebackup, file, pos, "append");
                     }
 
                 }
 
-            }
-            else {
+            } else {
                 //si la nouvelle valeur est inferieur à l'ancienne valeur
                 char *filebackup = "backup.map";
                 createCopy(file, filebackup, 0, "trunc");
@@ -815,26 +788,69 @@ int main(int argc,char ** argv)
                         perror("Zero caractere Ecrit");
                         exit(0);
                     }
-                    int newnbelemts = nbelmtssave - (width - hORw) * height;
-                    w = write(fd, &newnbelemts, sizeof(int));
-                    if (w == -1) {
-                        perror("Erreur de ecriture du fichier nbelemts save");
-                        exit(0);
-                    }
-                    if (w == 0) {
-                        perror("Zero caractere Ecrit");
-                        exit(0);
-                    }
-
-                    fdBackup=open(filebackup,O_RDONLY);
+                    int x, y, obj;
+                    fdBackup = open(filebackup, O_RDONLY);
                     int vue;
-                    int x,y,obj;
-                    if(fdBackup!=-1) {
+
+                    if (fdBackup != -1) {
+                        lseek(fdBackup, 4 * sizeof(int), SEEK_SET);
+                        int nbelemtsDelete = 0;
+                        for (int i = 0; i < nbelmtssave; ++i) {
+                            // printf("i: %d \n", i);
+
+                            r = read(fdBackup, &obj, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture obj  backup\n");
+                                exit(0);
+                            }
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+                            r = read(fdBackup, &x, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture x \n");
+                                exit(0);
+                            }
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+                            r = read(fdBackup, &y, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture y \n");
+                                exit(0);
+                            }
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+
+                            for (int j = hORw; j < width; ++j) {
+                                if (x == j) {
+                                    nbelemtsDelete++;
+                                    break;
+                                }
+                            }
+                        }
+
+                        int newnbelemts = nbelmtssave - nbelemtsDelete;
+                        printf("new :%d", newnbelemts);
+                        w = write(fd, &newnbelemts, sizeof(int));
+                        if (w == -1) {
+                            perror("Erreur de ecriture du fichier nbelemts save");
+                            exit(0);
+                        }
+                        if (w == 0) {
+                            perror("Zero caractere Ecrit");
+                            exit(0);
+                        }
+
 
                         lseek(fdBackup, 4 * sizeof(int), SEEK_SET);
 
                         for (int i = 0; i < nbelmtssave; ++i) {
-                           // printf("i: %d \n", i);
+                            // printf("i: %d \n", i);
 
                             r = read(fdBackup, &obj, sizeof(int));
                             if (r == -1) {
@@ -907,8 +923,8 @@ int main(int argc,char ** argv)
                         close(fdBackup);
                         //fin add ground
                         //ajout des caracteristique des objects
-                        int pos = 4*sizeof(int)+nbelmtssave*(3*sizeof(int));
-                        createCopy(filebackup,file,pos,"append");
+                        int pos = 4 * sizeof(int) + nbelmtssave * (3 * sizeof(int));
+                        createCopy(filebackup, file, pos, "append");
 
 
                     }
@@ -916,236 +932,382 @@ int main(int argc,char ** argv)
 
                 }
             }
-        }
-        else
-            if(strcmp(option,"--setheight")==0)
-            {
-                if(hORw<20 && hORw>height)
-                {
-                    //creer un backup du fichier save.map
-                    char * filebackup ="backup.map";
-                    createCopy(file,filebackup,0,"trunc");
-                    int fd = open(file,O_WRONLY|O_TRUNC,0666);
-                    int fdBackup ;
-                    int r,w;
-                    int intbuff;
-                    if(fd!=-1)
-                    {
-                        w = write(fd,&width,sizeof(int));
-                        if(w==-1)
-                        {
-                            perror("Erreur de ecriture du fichier hOrw");
-                            exit(0);
+        } else if (strcmp(option, "--setheight") == 0) {
+            if (hORw < 20 && hORw > height) {
+                //creer un backup du fichier save.map
+                char *filebackup = "backup.map";
+                createCopy(file, filebackup, 0, "trunc");
+                int fd = open(file, O_WRONLY | O_TRUNC, 0666);
+                int fdBackup;
+                int r, w;
+                int intbuff;
+                if (fd != -1) {
+                    w = write(fd, &width, sizeof(int));
+                    if (w == -1) {
+                        perror("Erreur de ecriture du fichier hOrw");
+                        exit(0);
+                    }
+                    if (w == 0) {
+                        perror("Zero caractere Ecrit");
+                        exit(0);
+                    }
+                    w = write(fd, &hORw, sizeof(int));
+                    if (w == -1) {
+                        perror("Erreur de ecriture du fichier height save");
+                        exit(0);
+                    }
+                    if (w == 0) {
+                        perror("Zero caractere Ecrit");
+                        exit(0);
+                    }
+                    w = write(fd, &nbobjets, sizeof(int));
+                    if (w == -1) {
+                        perror("Erreur de ecriture du fichier objects save");
+                        exit(0);
+                    }
+                    if (w == 0) {
+                        perror("Zero caractere Ecrit");
+                        exit(0);
+                    }
+                    int newnbelemts = nbelmtssave + (hORw - height) * 2;
+                    w = write(fd, &newnbelemts, sizeof(int));
+                    if (w == -1) {
+                        perror("Erreur de ecriture du fichier nbelemts save");
+                        exit(0);
+                    }
+                    if (w == 0) {
+                        perror("Zero caractere Ecrit");
+                        exit(0);
+                    }
+
+                    fdBackup = open(filebackup, O_RDONLY);
+                    int vue;
+                    int x, y, obj;
+                    if (fdBackup != -1) {
+                        lseek(fdBackup, 4 * sizeof(int), SEEK_SET);
+                        //completion du murs
+                        for (int l = 0; l < hORw - height; ++l) {
+                            //obj
+                            obj = 1;
+                            w = write(fd, &obj, sizeof(int));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier obj save");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            x = 0;
+                            w = write(fd, &x, sizeof(int));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier obj save");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            y = l;
+                            w = write(fd, &y, sizeof(int));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier obj save");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            printf("WALL obj:%d x:%d y:%d \n", obj, x, y);
                         }
-                        if(w==0)
-                        {
-                            perror("Zero caractere Ecrit");
-                            exit(0);
+                        for (int l = 0; l < hORw - height; ++l) {
+                            //obj
+                            obj = 1;
+                            w = write(fd, &obj, sizeof(int));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier obj save");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            x = width - 1;
+                            w = write(fd, &x, sizeof(int));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier obj save");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            y = l;
+                            w = write(fd, &y, sizeof(int));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier obj save");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            printf("WALL obj:%d x:%d y:%d \n", obj, x, y);
                         }
-                        w = write(fd,&hORw,sizeof(int));
-                        if(w==-1)
-                        {
-                            perror("Erreur de ecriture du fichier height save");
-                            exit(0);
+
+                        for (int i = 0; i < nbelmtssave; ++i) {
+
+
+                            r = read(fdBackup, &obj, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture obj \n");
+                                exit(0);
+                            }
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+                            r = read(fdBackup, &x, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture x \n");
+                                exit(0);
+                            }
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+                            r = read(fdBackup, &y, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture y \n");
+                                exit(0);
+                            }
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+
+                            //changement des coordonnes du mur pour les mettre à la fin
+                            w = write(fd, &obj, sizeof(int));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier obj save");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            w = write(fd, &x, sizeof(int));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier x save");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            w = write(fd, &y, sizeof(int));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier y save");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+
                         }
-                        if(w==0)
-                        {
-                            perror("Zero caractere Ecrit");
-                            exit(0);
+                        //fin save old elements
+
+
+                        close(fd);
+                        close(fdBackup);
+                        //fin add ground
+                        //ajout des caracteristique des objects
+                        int pos = 4 * sizeof(int) + nbelmtssave * (3 * sizeof(int));
+                        createCopy(filebackup, file, pos, "append");
+                    }
+
+                }
+            }
+            else {
+                //si la nouvelle valeur est inferieur à l'ancienne valeur de height
+                char *filebackup = "backup.map";
+                createCopy(file, filebackup, 0, "trunc");
+                int fd = open(file, O_WRONLY | O_TRUNC, 0666);
+                int fdBackup;
+                int r, w;
+                int intbuff;
+                if (fd != -1) {
+                    w = write(fd, &width, sizeof(int));
+                    if (w == -1) {
+                        perror("Erreur de ecriture du fichier hOrw");
+                        exit(0);
+                    }
+                    if (w == 0) {
+                        perror("Zero caractere Ecrit");
+                        exit(0);
+                    }
+                    w = write(fd, &hORw, sizeof(int));
+                    if (w == -1) {
+                        perror("Erreur de ecriture du fichier height save");
+                        exit(0);
+                    }
+                    if (w == 0) {
+                        perror("Zero caractere Ecrit");
+                        exit(0);
+                    }
+                    w = write(fd, &nbobjets, sizeof(int));
+                    if (w == -1) {
+                        perror("Erreur de ecriture du fichier objects save");
+                        exit(0);
+                    }
+                    if (w == 0) {
+                        perror("Zero caractere Ecrit");
+                        exit(0);
+                    }
+                    int x, y, obj;
+                    fdBackup = open(filebackup, O_RDONLY);
+                    int vue;
+
+                    if (fdBackup != -1) {
+                        lseek(fdBackup, 4 * sizeof(int), SEEK_SET);
+                        int nbelemtsDelete = 0;
+                        for (int i = 0; i < nbelmtssave; ++i) {
+                            // printf("i: %d \n", i);
+
+                            r = read(fdBackup, &obj, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture obj  backup\n");
+                                exit(0);
+                            }
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+                            r = read(fdBackup, &x, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture x \n");
+                                exit(0);
+                            }
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+                            r = read(fdBackup, &y, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture y \n");
+                                exit(0);
+                            }
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+
+                            for (int j = 0; j < hORw; ++j) {
+                                if (y == j) {
+                                    nbelemtsDelete++;
+                                    break;
+                                }
+                            }
                         }
-                        w = write(fd,&nbobjets,sizeof(int));
-                        if(w==-1)
-                        {
-                            perror("Erreur de ecriture du fichier objects save");
-                            exit(0);
-                        }
-                        if(w==0)
-                        {
-                            perror("Zero caractere Ecrit");
-                            exit(0);
-                        }
-                        int newnbelemts = nbelmtssave+(hORw-height)*2;
-                        w = write(fd,&newnbelemts,sizeof(int));
-                        if(w==-1)
-                        {
+
+                        int newnbelemts = nbelmtssave - nbelemtsDelete;
+                        printf("new :%d \n", newnbelemts);
+                        w = write(fd, &newnbelemts, sizeof(int));
+                        if (w == -1) {
                             perror("Erreur de ecriture du fichier nbelemts save");
                             exit(0);
                         }
-                        if(w==0)
-                        {
+                        if (w == 0) {
                             perror("Zero caractere Ecrit");
                             exit(0);
                         }
 
-                        fdBackup=open(filebackup,O_RDONLY);
-                        int vue;
-                        int x,y,obj;
-                        if(fdBackup!=-1)
-                        {
-                            lseek(fdBackup,4*sizeof(int),SEEK_SET);
-                            //completion du murs
-                            for (int l = 0; l <hORw-height ; ++l) {
-                                //obj
-                                obj=1;
-                                w = write(fd,&obj,sizeof(int));
-                                if(w==-1)
-                                {
-                                    perror("Erreur de ecriture du fichier obj save");
-                                    exit(0);
-                                }
-                                if(w==0)
-                                {
-                                    perror("Zero caractere Ecrit");
-                                    exit(0);
-                                }
-                                x=0;
-                                w = write(fd,&x,sizeof(int));
-                                if(w==-1)
-                                {
-                                    perror("Erreur de ecriture du fichier obj save");
-                                    exit(0);
-                                }
-                                if(w==0)
-                                {
-                                    perror("Zero caractere Ecrit");
-                                    exit(0);
-                                }
-                                y=l;
-                                w = write(fd,&y,sizeof(int));
-                                if(w==-1)
-                                {
-                                    perror("Erreur de ecriture du fichier obj save");
-                                    exit(0);
-                                }
-                                if(w==0)
-                                {
-                                    perror("Zero caractere Ecrit");
-                                    exit(0);
-                                }
-                                printf("WALL obj:%d x:%d y:%d \n", obj, x, y);
+
+                        lseek(fdBackup, 4 * sizeof(int), SEEK_SET);
+
+                        for (int i = 0; i < nbelmtssave; ++i) {
+                            // printf("i: %d \n", i);
+
+                            r = read(fdBackup, &obj, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture obj  backup\n");
+                                exit(0);
                             }
-                            for (int l = 0; l <hORw-height ; ++l) {
-                                //obj
-                                obj=1;
-                                w = write(fd,&obj,sizeof(int));
-                                if(w==-1)
-                                {
-                                    perror("Erreur de ecriture du fichier obj save");
-                                    exit(0);
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+                            r = read(fdBackup, &x, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture x \n");
+                                exit(0);
+                            }
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+                            r = read(fdBackup, &y, sizeof(int));
+                            if (r == -1) {
+                                perror("Erreur de lecture y \n");
+                                exit(0);
+                            }
+                            if (r == 0) {
+                                perror("Zero caractere lu \n");
+                                exit(0);
+                            }
+                            int in = 0;
+                            for (int j = 0; j < hORw; ++j) {
+                                if (y == j) {
+                                    in = 1;
+                                    break;
                                 }
-                                if(w==0)
-                                {
-                                    perror("Zero caractere Ecrit");
-                                    exit(0);
-                                }
-                                x=width-1;
-                                w = write(fd,&x,sizeof(int));
-                                if(w==-1)
-                                {
-                                    perror("Erreur de ecriture du fichier obj save");
-                                    exit(0);
-                                }
-                                if(w==0)
-                                {
-                                    perror("Zero caractere Ecrit");
-                                    exit(0);
-                                }
-                                y=l;
-                                w = write(fd,&y,sizeof(int));
-                                if(w==-1)
-                                {
-                                    perror("Erreur de ecriture du fichier obj save");
-                                    exit(0);
-                                }
-                                if(w==0)
-                                {
-                                    perror("Zero caractere Ecrit");
-                                    exit(0);
-                                }
-                                printf("WALL obj:%d x:%d y:%d \n", obj, x, y);
                             }
 
-                            for (int i = 0; i <nbelmtssave ; ++i) {
-
-
-                                r = read(fdBackup, &obj, sizeof(int));
-                                if (r == -1) {
-                                    perror("Erreur de lecture obj \n");
-                                    exit(0);
-                                }
-                                if (r == 0) {
-                                    perror("Zero caractere lu \n");
-                                    exit(0);
-                                }
-                                r = read(fdBackup, &x, sizeof(int));
-                                if (r == -1) {
-                                    perror("Erreur de lecture x \n");
-                                    exit(0);
-                                }
-                                if (r == 0) {
-                                    perror("Zero caractere lu \n");
-                                    exit(0);
-                                }
-                                r = read(fdBackup, &y, sizeof(int));
-                                if (r == -1) {
-                                    perror("Erreur de lecture y \n");
-                                    exit(0);
-                                }
-                                if (r == 0) {
-                                    perror("Zero caractere lu \n");
-                                    exit(0);
-                                }
-
+                            if (in != 1) {
                                 //changement des coordonnes du mur pour les mettre à la fin
-                                w = write(fd,&obj,sizeof(int));
-                                if(w==-1)
-                                {
+                                w = write(fd, &obj, sizeof(int));
+                                if (w == -1) {
                                     perror("Erreur de ecriture du fichier obj save");
                                     exit(0);
                                 }
-                                if(w==0)
-                                {
+                                if (w == 0) {
                                     perror("Zero caractere Ecrit");
                                     exit(0);
                                 }
-                                w = write(fd,&x,sizeof(int));
-                                if(w==-1)
-                                {
+                                w = write(fd, &x, sizeof(int));
+                                if (w == -1) {
                                     perror("Erreur de ecriture du fichier x save");
                                     exit(0);
                                 }
-                                if(w==0)
-                                {
+                                if (w == 0) {
                                     perror("Zero caractere Ecrit");
                                     exit(0);
                                 }
-                                w = write(fd,&y,sizeof(int));
-                                if(w==-1)
-                                {
+                                w = write(fd, &y, sizeof(int));
+                                if (w == -1) {
                                     perror("Erreur de ecriture du fichier y save");
                                     exit(0);
                                 }
-                                if(w==0)
-                                {
+                                if (w == 0) {
                                     perror("Zero caractere Ecrit");
                                     exit(0);
                                 }
 
                             }
-                            //fin save old elements
+                        }//fin add object
+                        close(fd);
+                        close(fdBackup);
+                        //fin add ground
+                        //ajout des caracteristique des objects
+                        int pos = 4 * sizeof(int) + nbelmtssave * (3 * sizeof(int));
+                        createCopy(filebackup, file, pos, "append");
 
-
-                            close(fd);
-                            close(fdBackup);
-                            //fin add ground
-                            //ajout des caracteristique des objects
-                            int pos = 4*sizeof(int)+nbelmtssave*(3*sizeof(int));
-                            createCopy(filebackup,file,pos,"append");
-                        }
 
                     }
                 }
             }
+        }
 
     }
 

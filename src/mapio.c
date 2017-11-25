@@ -354,7 +354,8 @@ void map_load (char *filename)
                     }
                 r=read(fd,filename,lname);
                 //ensuite j'achete le caractere de fin de chaine
-                filename[lname]='\0';
+                if(filename[lname]!='\0')
+                    filename[lname]='\0';
 
                 if(r==-1)
                     exit_with_error ("Erreur de lecture\n");
