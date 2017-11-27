@@ -333,10 +333,11 @@ void createCopy(char * filesrc,char * filedest,int position,char * option)
     }
     //object caract
 
-    for(int i= 0 ; i<nbobjects;i++)
+    for(int i= 0 ; i<nbobjects;++i)
     {
-        char * filename ;
 
+        char * filename ;
+        printf("%d\n",i);
         //frame
         r=read(fd,&buff,sizeof(unsigned));
         if (r == -1) {
@@ -487,7 +488,7 @@ void createCopy(char * filesrc,char * filedest,int position,char * option)
             exit(0);
         }
         //printf("%s \n",filename);
-        printf(" dans \n");
+
         //je libere l'espace allouer recemment
         free(filename);
     }
@@ -609,7 +610,7 @@ int main(int argc,char ** argv)
                     int newnbelemts = nbelmtssave + hORw - width;
                     w = write(fd, &newnbelemts, sizeof(int));
                     if (w == -1) {
-                        perror("Erreur de ecriture du fichier nbelemts save");
+                        perror("Erreur de ecriture du fichier new nbelemts save");
                         exit(0);
                     }
                     if (w == 0) {
@@ -740,13 +741,13 @@ int main(int argc,char ** argv)
                                 perror("Zero caractere Ecrit");
                                 exit(0);
                             }
-                            printf("GROUND obj:%d x:%d y:%d \n", obj, x, y);
+
                         }
                         close(fd);
                         close(fdBackup);
                         //fin add ground
                         //ajout des caracteristique des objects
-                        int pos = 4 * sizeof(int) + nbelmtssave * (3 * sizeof(int));
+                        int pos = 4*sizeof(int)+nbelmtssave*(3*sizeof(int));
                         createCopy(filebackup, file, pos, "append");
                     }
 
@@ -827,7 +828,7 @@ int main(int argc,char ** argv)
                             }
 
                             for (int j = hORw; j < width; ++j) {
-                                if (x == j) {
+                                if (x == j && obj!=1) {
                                     nbelemtsDelete++;
                                     break;
                                 }
@@ -838,7 +839,7 @@ int main(int argc,char ** argv)
                         printf("new :%d", newnbelemts);
                         w = write(fd, &newnbelemts, sizeof(int));
                         if (w == -1) {
-                            perror("Erreur de ecriture du fichier nbelemts save");
+                            perror("Erreur de ecriture du fichier new nbelemts save");
                             exit(0);
                         }
                         if (w == 0) {
@@ -918,10 +919,45 @@ int main(int argc,char ** argv)
                                 }
 
                             }
+                            else
+                            {
+                                if(obj==1)
+                                {
+                                    w = write(fd, &obj, sizeof(int));
+                                    if (w == -1) {
+                                        perror("Erreur de ecriture du fichier obj save");
+                                        exit(0);
+                                    }
+                                    if (w == 0) {
+                                        perror("Zero caractere Ecrit");
+                                        exit(0);
+                                    }
+                                    x=hORw-1;
+                                    w = write(fd, &x, sizeof(int));
+                                    if (w == -1) {
+                                        perror("Erreur de ecriture du fichier x save");
+                                        exit(0);
+                                    }
+                                    if (w == 0) {
+                                        perror("Zero caractere Ecrit");
+                                        exit(0);
+                                    }
+                                    w = write(fd, &y, sizeof(int));
+                                    if (w == -1) {
+                                        perror("Erreur de ecriture du fichier y save");
+                                        exit(0);
+                                    }
+                                    if (w == 0) {
+                                        perror("Zero caractere Ecrit");
+                                        exit(0);
+                                    }
+                                }
+                            }
                         }//fin add object
+
                         close(fd);
                         close(fdBackup);
-                        //fin add ground
+
                         //ajout des caracteristique des objects
                         int pos = 4 * sizeof(int) + nbelmtssave * (3 * sizeof(int));
                         createCopy(filebackup, file, pos, "append");
