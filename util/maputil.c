@@ -1353,6 +1353,16 @@ int main(int argc,char ** argv)
         }
 
     }
+    else
+        if(argc>4)
+        {
+            char *file = argv[1];
+            char *option = argv[2];
+            if (strcmp(option,"--setobjects")==0)
+            {
+
+            }
+        }
 
 
 
