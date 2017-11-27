@@ -337,7 +337,7 @@ void createCopy(char * filesrc,char * filedest,int position,char * option)
     {
 
         char * filename ;
-        printf("%d\n",i);
+        //printf("%d\n",i);
         //frame
         r=read(fd,&buff,sizeof(unsigned));
         if (r == -1) {
@@ -1088,7 +1088,7 @@ int main(int argc,char ** argv)
                                 perror("Zero caractere Ecrit");
                                 exit(0);
                             }
-                            printf("WALL obj:%d x:%d y:%d \n", obj, x, y);
+                            //printf("WALL obj:%d x:%d y:%d \n", obj, x, y);
                         }
 
                         for (int i = 0; i < nbelmtssave; ++i) {
@@ -1122,7 +1122,7 @@ int main(int argc,char ** argv)
                                 exit(0);
                             }
 
-                            //changement des coordonnes du mur pour les mettre à la fin
+
                             w = write(fd, &obj, sizeof(int));
                             if (w == -1) {
                                 perror("Erreur de ecriture du fichier obj save");
@@ -1141,6 +1141,7 @@ int main(int argc,char ** argv)
                                 perror("Zero caractere Ecrit");
                                 exit(0);
                             }
+                            y=y+(hORw-height);
                             w = write(fd, &y, sizeof(int));
                             if (w == -1) {
                                 perror("Erreur de ecriture du fichier y save");
@@ -1239,8 +1240,8 @@ int main(int argc,char ** argv)
                                 exit(0);
                             }
 
-                            for (int j = 0; j < hORw; ++j) {
-                                if (y == j) {
+                            for (int j = 0; j < height-hORw; ++j) {
+                                if (y == j ) {
                                     nbelemtsDelete++;
                                     break;
                                 }
@@ -1248,7 +1249,7 @@ int main(int argc,char ** argv)
                         }
 
                         int newnbelemts = nbelmtssave - nbelemtsDelete;
-                        printf("new :%d \n", newnbelemts);
+                       // printf("new :%d \n", newnbelemts);
                         w = write(fd, &newnbelemts, sizeof(int));
                         if (w == -1) {
                             perror("Erreur de ecriture du fichier nbelemts save");
@@ -1261,7 +1262,7 @@ int main(int argc,char ** argv)
 
 
                         lseek(fdBackup, 4 * sizeof(int), SEEK_SET);
-
+                        int nbtest=0;
                         for (int i = 0; i < nbelmtssave; ++i) {
                             // printf("i: %d \n", i);
 
@@ -1293,7 +1294,7 @@ int main(int argc,char ** argv)
                                 exit(0);
                             }
                             int in = 0;
-                            for (int j = 0; j < hORw; ++j) {
+                            for (int j = 0; j < height-hORw; ++j) {
                                 if (y == j) {
                                     in = 1;
                                     break;
@@ -1301,6 +1302,7 @@ int main(int argc,char ** argv)
                             }
 
                             if (in != 1) {
+                                nbtest++;
                                 //changement des coordonnes du mur pour les mettre à la fin
                                 w = write(fd, &obj, sizeof(int));
                                 if (w == -1) {
@@ -1320,6 +1322,7 @@ int main(int argc,char ** argv)
                                     perror("Zero caractere Ecrit");
                                     exit(0);
                                 }
+                                y=y-(height-hORw);
                                 w = write(fd, &y, sizeof(int));
                                 if (w == -1) {
                                     perror("Erreur de ecriture du fichier y save");
@@ -1330,8 +1333,12 @@ int main(int argc,char ** argv)
                                     exit(0);
                                 }
 
+
                             }
+
+
                         }//fin add object
+
                         close(fd);
                         close(fdBackup);
                         //fin add ground
