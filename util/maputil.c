@@ -496,7 +496,423 @@ void createCopy(char * filesrc,char * filedest,int position,char * option)
     close(fdbackup);
 
 }
+int * pruneobjects (char  * file )
+{
+    int nbelemts = getnbelmts(file);
+    int * tab = malloc(sizeof(int)); ;
+    int fd = open(file,O_RDONLY);
+    int w,r,i;
+    int buff;
+    int obj;
+    if(fd!=-1)
+    {
+        lseek(fd,4*sizeof(int),SEEK_SET);
+        for (int i = 0; i <nbelemts ; ++i) {
+            r = read(fd, &obj, sizeof(int));
+            if (r == -1) {
+                perror("Erreur de lecture obj dans save\n");
+                exit(0);
+            }
+            if (r == 0) {
+                perror("Zero caractere lu obj\n");
+                exit(0);
+            }
+            int in=0;
 
+            for (int j = 0; j <8 ; ++j) {
+                if(obj==j)
+                {
+                    in=1;
+                    break;
+                }
+            }
+            if(in!=1)
+            {
+               tab[i]=obj;
+                tab = realloc(tab,sizeof(int));
+                if (tab==NULL)
+                {
+                    perror("Erreur de realloc");
+                    exit(1);
+                }
+                i++;
+            }
+            lseek(fd, 2 * sizeof(int), SEEK_CUR);
+        }
+
+    }
+    close(fd);
+    return tab;
+}
+void copyObjects(char * filesrc,char * filedest, const char * objects[])
+{
+    int fd = open(filesrc,O_RDONLY);
+    int fdbackup;
+    fdbackup = open(filedest,O_CREAT|O_WRONLY|O_TRUNC,0666);
+
+    int * pruneobject= pruneobjects(filesrc);
+    int r,w;
+    int intbuf;
+    char buff;
+    int nbobjects;
+
+        lseek(fd,0,SEEK_SET);
+        //width
+        r= read(fd,&intbuf, sizeof(int));
+        if(r==-1)
+        {
+            perror("Erreur de lecture width\n");
+            exit(0);
+        }
+        if(r==0)
+        {
+            perror("Zero caractere lu width \n");
+            exit(0);
+        }
+        w = write(fdbackup,&intbuf,sizeof(int));
+        if(w==-1)
+        {
+            perror("Erreur de ecriture du fichier width");
+            exit(0);
+        }
+        if(w==0)
+        {
+            perror("Zero caractere Ecrit");
+            exit(0);
+        }
+        //height
+        r= read(fd,&intbuf, sizeof(int));
+        if(r==-1)
+        {
+            perror("Erreur de lecture height\n");
+            exit(0);
+        }
+        if(r==0)
+        {
+            perror("Zero caractere lu height\n");
+            exit(0);
+        }
+        w = write(fdbackup,&intbuf,sizeof(int));
+        if(w==-1)
+        {
+            perror("Erreur de ecriture du fichier height");
+            exit(0);
+        }
+        if(w==0)
+        {
+            perror("Zero caractere Ecrit");
+            exit(0);
+        }
+        //nbobjects
+        r= read(fd,&intbuf, sizeof(int));
+        if(r==-1)
+        {
+            perror("Erreur de lecture nbobj\n");
+            exit(0);
+        }
+        if(r==0)
+        {
+            perror("Zero caractere lu nbobj\n");
+            exit(0);
+        }
+        nbobjects= intbuf;
+        w = write(fdbackup,&intbuf,sizeof(int));
+        if(w==-1)
+        {
+            perror("Erreur de ecriture du fichier nbobjects");
+            exit(0);
+        }
+        if(w==0)
+        {
+            perror("Zero caractere Ecrit");
+            exit(0);
+        }
+        //nbelmts
+        r= read(fd,&intbuf, sizeof(int));
+        if(r==-1)
+        {
+            perror("Erreur de lecture nbelmts\n");
+            exit(0);
+        }
+        if(r==0)
+        {
+            perror("Zero caractere lu nbelmts\n");
+            exit(0);
+        }
+        w = write(fdbackup,&intbuf,sizeof(int));
+        if(w==-1)
+        {
+            perror("Erreur de ecriture du fichier nbelmts");
+            exit(0);
+        }
+        if(w==0)
+        {
+            perror("Zero caractere Ecrit");
+            exit(0);
+        }
+        int nbelmts = intbuf;
+        for (int i = 0; i <nbelmts ; ++i) {
+            //obj
+            r= read(fd,&intbuf, sizeof(int));
+            if(r==-1)
+            {
+                perror("Erreur de lecture obj dans save\n");
+                exit(0);
+            }
+            if(r==0)
+            {
+                perror("Zero caractere lu obj\n");
+                exit(0);
+            }
+            w = write(fdbackup,&intbuf,sizeof(int));
+            if(w==-1)
+            {
+                perror("Erreur de ecriture du fichier obj dans save");
+                exit(0);
+            }
+            if(w==0)
+            {
+                perror("Zero caractere Ecrit");
+                exit(0);
+            }
+            //x
+            r= read(fd,&intbuf, sizeof(int));
+            if(r==-1)
+            {
+                perror("Erreur de lecture x\n");
+                exit(0);
+            }
+            if(r==0)
+            {
+                perror("Zero caractere lu x\n");
+                exit(0);
+            }
+            w = write(fdbackup,&intbuf,sizeof(int));
+            if(w==-1)
+            {
+                perror("Erreur de ecriture du fichier x");
+                exit(0);
+            }
+            if(w==0)
+            {
+                perror("Zero caractere Ecrit");
+                exit(0);
+            }
+            //y
+            r= read(fd,&intbuf, sizeof(int));
+            if(r==-1)
+            {
+                perror("Erreur de lecture y\n");
+                exit(0);
+            }
+            if(r==0)
+            {
+                perror("Zero caractere lu y\n");
+                exit(0);
+            }
+            w = write(fdbackup,&intbuf,sizeof(int));
+            if(w==-1)
+            {
+                perror("Erreur de ecriture du fichier y");
+                exit(0);
+            }
+            if(w==0)
+            {
+                perror("Zero caractere Ecrit");
+                exit(0);
+            }
+        }
+        //fin nbelemts
+    char frame;
+    char solid;
+    char dest;
+    char collect;
+    char gener;
+
+    for (int j = 0; j <nbobjects ; ++j) {
+        char * filename ;
+        printf("%d\n",j);
+        //frame
+        r=read(fd,&frame,sizeof(unsigned));
+        if (r == -1) {
+            perror("Erreur de lecture frame dans save back \n");
+            exit(0);
+        }
+        if (r == 0) {
+            perror("Zero caractere lu frame dans save back\n");
+            exit(0);
+        }
+
+
+        //solid
+        r=read(fd,&solid,sizeof(unsigned));
+        if (r == -1) {
+            perror("Erreur de lecture solid \n");
+            exit(0);
+        }
+        if (r == 0) {
+            perror("Zero caractere lu solid\n");
+            exit(0);
+        }
+
+
+        //dest
+        r=read(fd,&dest,sizeof(unsigned));
+        if (r == -1) {
+            perror("Erreur de lecture dest \n");
+            exit(0);
+        }
+        if (r == 0) {
+            perror("Zero caractere lu dest \n");
+            exit(0);
+        }
+
+
+        //collect
+        r=read(fd,&collect,sizeof(unsigned));
+        if (r == -1) {
+            perror("Erreur de lecture collect \n");
+            exit(0);
+        }
+        if (r == 0) {
+            perror("Zero caractere lu collect\n");
+            exit(0);
+        }
+
+        //gener
+        r=read(fd,&gener,sizeof(unsigned));
+        if (r == -1) {
+            perror("Erreur de lecture gener \n");
+            exit(0);
+        }
+        if (r == 0) {
+            perror("Zero caractere lu gener\n");
+            exit(0);
+        }
+
+
+        //lname
+        int lname;
+        r=read(fd,&lname,sizeof(int));
+        if (r == -1) {
+            perror("Erreur de lecture lname\n");
+            exit(0);
+        }
+        if (r == 0) {
+            perror("Zero caractere lu lname\n");
+            exit(0);
+        }
+
+        //name
+        //J'alloue de la memoire à filename avec le nombre de caractere de la chaine lie dans le fichier  avec malloc
+        filename = malloc(lname);
+        if(filename==NULL)
+        {
+            fprintf(stderr,"Erreur malloc \n");
+            EXIT_FAILURE;
+        }
+        r=read(fd,filename,lname);
+        if (r == -1) {
+            perror("Erreur de lecture file \n");
+            exit(0);
+        }
+        if (r == 0) {
+            perror("Zero caractere lu file \n");
+            exit(0);
+        }
+        filename[lname]='\0';
+        //ensuite j'achete le caractere de fin de chaine
+        int obj;
+        for (int i = 0; i <sizeof(objects)/sizeof(const char *) ; ++i) {
+            if(strcmp(filename,objects[j])==0)
+            {
+                obj=j;
+                break;
+            }
+        }
+        int purge = 0 ;
+        for (int k = 0; k <sizeof(pruneobject)/sizeof(int) ; ++k) {
+            if(k==obj)
+            {
+                purge=1;
+            }
+        }
+        if(purge!=1)
+        {
+            w = write(fdbackup, &frame, sizeof(unsigned));
+            if (w == -1) {
+                perror("Erreur de ecriture du fichier frame");
+                exit(0);
+            }
+            if (w == 0) {
+                perror("Zero caractere Ecrit");
+                exit(0);
+            }
+            w = write(fdbackup, &solid, sizeof(unsigned));
+            if (w == -1) {
+                perror("Erreur de ecriture du fichier frame");
+                exit(0);
+            }
+            if (w == 0) {
+                perror("Zero caractere Ecrit");
+                exit(0);
+            }
+            w = write(fdbackup, &dest, sizeof(unsigned));
+            if (w == -1) {
+                perror("Erreur de ecriture du fichier frame");
+                exit(0);
+            }
+            if (w == 0) {
+                perror("Zero caractere Ecrit");
+                exit(0);
+            }
+            w = write(fdbackup, &collect, sizeof(unsigned));
+            if (w == -1) {
+                perror("Erreur de ecriture du fichier frame");
+                exit(0);
+            }
+            if (w == 0) {
+                perror("Zero caractere Ecrit");
+                exit(0);
+            }
+            w = write(fdbackup, &gener, sizeof(unsigned));
+            if (w == -1) {
+                perror("Erreur de ecriture du fichier frame");
+                exit(0);
+            }
+            if (w == 0) {
+                perror("Zero caractere Ecrit");
+                exit(0);
+            }
+
+            w = write(fdbackup, filename, lname);
+            if (w == -1) {
+                perror("Erreur de ecriture du fichier file \n");
+                exit(0);
+            }
+            if (w == 0) {
+                perror("Zero caractere Ecrit file\n");
+                exit(0);
+            }
+            w = write(fdbackup, filename, lname);
+            if (w == -1) {
+                perror("Erreur de ecriture du fichier file \n");
+                exit(0);
+            }
+            if (w == 0) {
+                perror("Zero caractere Ecrit file\n");
+                exit(0);
+            }
+        }
+
+        printf("%s \n",filename);
+
+        //je libere l'espace allouer recemment
+        free(filename);
+    }
+
+
+}
 
 int main(int argc,char ** argv)
 {
@@ -552,12 +968,40 @@ int main(int argc,char ** argv)
                    printf("width: %d height: %d nbObjects: %d nbelements: %d \n", w, h, nb,nbelmts);
                }
                else
-               {
-                   printf("Voici les options : \n");
-                   printf("--getwidth \n");
-                   printf("--getheight \n");
-                   printf("--getinfo \n");
-               }
+                   if(strcmp(option,"--pruneobjects")==0)
+                   {
+                       char *filebackup = "backup.map";
+                       createCopy(file, filebackup, 0, "trunc");
+                       const char * objects[] = {
+                               "image/ground.png",
+                               "image/wall.png",
+                               "image/grass.png",
+                               "image/marble.png",
+                               "image/herb.png",
+                               "image/floor.png",
+                               "image/flower.png",
+                               "image/coin.png"
+                       };
+                       copyObjects(filebackup,file,objects);
+                       //0 GROUD
+                       //1 WALL
+                       //2 Grass
+                       //3 Marble
+                       //4 Herb
+                       //5 Floor
+                       //6 Flower
+                       //7 Coin
+
+
+                   }
+                    else
+                   {
+                       printf("Voici les options : \n");
+                       printf("--getwidth \n");
+                       printf("--getheight \n");
+                       printf("--pruneobjects \n");
+                       printf("--getinfo \n");
+                   }
            }
        }
     }
