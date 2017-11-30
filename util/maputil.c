@@ -4,6 +4,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include "error.h"
+#include "../include/map.h"
 int getwidth(char * file )
 {
     int fd = open(file,O_RDONLY);
@@ -499,10 +500,10 @@ void createCopy(char * filesrc,char * filedest,int position,char * option)
 int * pruneobjects (char  * file )
 {
     int nbelemts = getnbelmts(file);
-    int * tab = malloc(sizeof(int)); ;
+    int * tab = malloc(sizeof(int)*10); ;
     int fd = open(file,O_RDONLY);
-    int w,r,i;
-    int buff;
+    int r;
+    int tabi=0;
     int obj;
     if(fd!=-1)
     {
@@ -517,25 +518,37 @@ int * pruneobjects (char  * file )
                 perror("Zero caractere lu obj\n");
                 exit(0);
             }
+            printf("i de  nbelmts: %d obj : %d \n",i,obj);
             int in=0;
 
             for (int j = 0; j <8 ; ++j) {
                 if(obj==j)
                 {
+                    printf("Dans prune obj in: %d \n",obj);
                     in=1;
                     break;
                 }
             }
-            if(in!=1)
+            if(in==1)
             {
-               tab[i]=obj;
-                tab = realloc(tab,sizeof(int));
-                if (tab==NULL)
+                int not=0;
+                if(tabi!=0)
                 {
-                    perror("Erreur de realloc");
-                    exit(1);
+                    for (int j = 0; j <sizeof(tab)/sizeof(int) ; ++j) {
+                        if(tab[j]==obj)
+                        {
+                            not=1;
+                            break;
+                        }
+                    }
                 }
-                i++;
+
+                if(not!=1 || tabi==0)
+                {
+                    tab[tabi]=obj;
+                    tabi++;
+                }
+
             }
             lseek(fd, 2 * sizeof(int), SEEK_CUR);
         }
@@ -731,7 +744,7 @@ void copyObjects(char * filesrc,char * filedest, const char * objects[])
 
     for (int j = 0; j <nbobjects ; ++j) {
         char * filename ;
-        printf("%d\n",j);
+        //printf("%d\n",j);
         //frame
         r=read(fd,&frame,sizeof(unsigned));
         if (r == -1) {
@@ -824,20 +837,24 @@ void copyObjects(char * filesrc,char * filedest, const char * objects[])
         //ensuite j'achete le caractere de fin de chaine
         int obj;
         for (int i = 0; i <sizeof(objects)/sizeof(const char *) ; ++i) {
+            //printf("objects[%d] : %s  filename : %s\n",j,objects[j],filename);
             if(strcmp(filename,objects[j])==0)
             {
+                //printf("%s : %d \n",filename,j);
                 obj=j;
                 break;
             }
         }
         int purge = 0 ;
         for (int k = 0; k <sizeof(pruneobject)/sizeof(int) ; ++k) {
+
             if(k==obj)
             {
                 purge=1;
+                printf("k:%d obj:%d \n",k,obj);
             }
         }
-        if(purge!=1)
+        if(purge==1)
         {
             w = write(fdbackup, &frame, sizeof(unsigned));
             if (w == -1) {
@@ -884,7 +901,15 @@ void copyObjects(char * filesrc,char * filedest, const char * objects[])
                 perror("Zero caractere Ecrit");
                 exit(0);
             }
-
+            w = write(fdbackup, &lname, sizeof(int));
+            if (w == -1) {
+                perror("Erreur de ecriture du fichier lname");
+                exit(0);
+            }
+            if (w == 0) {
+                perror("Zero caractere Ecrit");
+                exit(0);
+            }
             w = write(fdbackup, filename, lname);
             if (w == -1) {
                 perror("Erreur de ecriture du fichier file \n");
@@ -894,26 +919,33 @@ void copyObjects(char * filesrc,char * filedest, const char * objects[])
                 perror("Zero caractere Ecrit file\n");
                 exit(0);
             }
-            w = write(fdbackup, filename, lname);
-            if (w == -1) {
-                perror("Erreur de ecriture du fichier file \n");
-                exit(0);
-            }
-            if (w == 0) {
-                perror("Zero caractere Ecrit file\n");
-                exit(0);
-            }
+            //printf("%s \n",filename);
         }
-
-        printf("%s \n",filename);
-
         //je libere l'espace allouer recemment
         free(filename);
     }
 
 
 }
+int getNotor (char * carcact )
+{
+    if(carcact[0]=='n')
+        return 0;
+    return 1;
+}
 
+int getWhatSolid(char *solid )
+{
+    if(strcmp(solid,"solid")==0)
+        return MAP_OBJECT_SOLID;
+    if(strcmp(solid,"semi-solid")==0)
+        return MAP_OBJECT_SEMI_SOLID;
+    if(strcmp(solid,"air")==0)
+        return MAP_OBJECT_AIR;
+    if(strcmp(solid,"liquid")==0)
+        return MAP_OBJECT_LIQUID;
+    return -1;
+}
 int main(int argc,char ** argv)
 {
     if(argc<3)
@@ -973,14 +1005,14 @@ int main(int argc,char ** argv)
                        char *filebackup = "backup.map";
                        createCopy(file, filebackup, 0, "trunc");
                        const char * objects[] = {
-                               "image/ground.png",
-                               "image/wall.png",
-                               "image/grass.png",
-                               "image/marble.png",
-                               "image/herb.png",
-                               "image/floor.png",
-                               "image/flower.png",
-                               "image/coin.png"
+                               "images/ground.png",
+                               "images/wall.png",
+                               "images/grass.png",
+                               "images/marble.png",
+                               "images/herb.png",
+                               "images/floor.png",
+                               "images/flower.png",
+                               "images/coin.png"
                        };
                        copyObjects(filebackup,file,objects);
                        //0 GROUD
@@ -1804,7 +1836,124 @@ int main(int argc,char ** argv)
             char *option = argv[2];
             if (strcmp(option,"--setobjects")==0)
             {
+                    char * filename;
+                    char * frame;
+                    char *solid;
+                    char *destruct;
+                    char *collect;
+                    char *gener;
+                    if(argc==9)
+                    {
+                        filename=argv[3];
+                        frame=argv[4];
+                        solid=argv[5];
+                        destruct=argv[6];
+                        collect=argv[7];
+                        gener=argv[8];
+                        int nbobjtssave  = getnbobjects(file);
+                        int nbelmtssave = getnbelmts(file);
+                        int w;
 
+
+                        int fd  = open(file,O_WRONLY,0666);
+                        if(fd!=-1)
+                        {
+
+                            lseek(fd,2*sizeof(int),SEEK_SET);
+                            int newnbobjects = nbobjtssave+1;
+                            w=write (fd,&newnbobjects,sizeof(int));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier frame");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                        }
+                        close(fd);
+                        char buff;
+                        fd = open(file,O_WRONLY|O_APPEND,0666);
+
+                        if(fd!=-1)
+                        {
+                            w=write (fd,&frame,sizeof(unsigned));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier frame");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            sprintf(&buff,"%d",getWhatSolid(solid));
+                            w=write (fd,&buff,sizeof(unsigned));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier frame");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            sprintf(&buff,"%d",getNotor(destruct));
+                            w=write (fd,&buff,sizeof(unsigned));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier frame");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            sprintf(&buff,"%d",getNotor(collect));
+                            w=write (fd,&buff,sizeof(unsigned));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier frame");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            sprintf(&buff,"%d",getNotor(gener));
+                            w=write (fd,&buff,sizeof(unsigned));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier frame");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                            int lname= strlen(filename);
+                            w=write (fd,&lname,sizeof(int));
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier frame");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+
+                            w=write (fd,filename,lname);
+                            if (w == -1) {
+                                perror("Erreur de ecriture du fichier frame");
+                                exit(0);
+                            }
+                            if (w == 0) {
+                                perror("Zero caractere Ecrit");
+                                exit(0);
+                            }
+                        }
+                        close(fd);
+                    }
+                    else
+                        if(argc>9)
+                        {
+
+                        }
             }
         }
 

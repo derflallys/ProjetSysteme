@@ -167,6 +167,7 @@ void map_save (char *filename)
                     exit_with_error ("Erreur d'ecriture\n");
             if(w==0)
                     exit_with_error (" Zero caractere lu \n");
+
             //collectible
             sprintf(&buff,"%d",map_is_collectible(i));
             w=write(fd,&buff,sizeof(unsigned));
@@ -175,6 +176,7 @@ void map_save (char *filename)
             if(w==0)
                     exit_with_error (" Zero caractere lu \n");
             //generator
+
             sprintf(&buff,"%d",map_is_generator(i));
             w=write(fd,&buff,sizeof(unsigned));
 
@@ -312,7 +314,7 @@ void map_load (char *filename)
                 if(r==0)
                     exit_with_error ("Aucun caractere lu\n");
                 solid = atoi(&buff);
-
+                printf("solid i:%d  %d ok \n",i,solid);
                 //dest
                 r=read(fd,&buff,sizeof(unsigned));
                 if(r==-1)
@@ -362,12 +364,17 @@ void map_load (char *filename)
                 if(r==0)
                     exit_with_error ("Aucun caractere lu\n");
 
+                printf(" gener %d collect %d dest %d %s \n",gener,collect,dest,filename);
+
                 //Comme c'est les coins et marble qui on des caracteristiques differents de ceux de bases je verifie leur caracteristique et je le mets
                 if(strcmp(filename,"images/coin.png")==0)
                     map_object_add (filename, frame,   collect  ==1 ? solid | MAP_OBJECT_COLLECTIBLE : solid  );
                 else
                 if(strcmp(filename,"images/marble.png")==0)
                     map_object_add (filename, frame,   dest  ==1 ? solid | MAP_OBJECT_DESTRUCTIBLE : solid  );
+                else
+                if(strcmp(filename,"images/question.png")==0)
+                    map_object_add (filename, frame,   dest  ==1 ? solid | MAP_OBJECT_GENERATOR : solid  );
                 else
                     map_object_add (filename, frame,    solid   );
 
